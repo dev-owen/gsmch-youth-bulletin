@@ -1,0 +1,4 @@
+interface:
+  display_name: "주보 사진 업데이트"
+  short_description: "사진과 날짜로 주보 내용을 업데이트"
+  default_prompt: "첨부한 주보 사진을 읽고 지정한 날짜의 주보에 확인 가능한 내용을 업데이트해줘."
