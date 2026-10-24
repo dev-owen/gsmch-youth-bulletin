@@ -61,18 +61,13 @@ API 입력 스키마 테스트는 `apps/api/tests`에 추가합니다. 현재 �
 
 ## 배포 설정
 
-1. 유료 관리형 PostgreSQL과 Cloudflare R2 버킷을 준비합니다. R2에는 공개 주보 이미지 전용 버킷을 사용합니다.
-2. Hyperdrive를 DB에 연결하며 쿼리 캐시는 끕니다. 생성된 ID를 `apps/api/wrangler.jsonc`의 `HYPERDRIVE` 바인딩에 넣습니다.
-3. `WEB_ORIGIN`, `BETTER_AUTH_URL`, `PUBLIC_MEDIA_BASE_URL`을 실제 `https://domain.com`, `https://api.domain.com`, `https://media.domain.com`으로 설정합니다. `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `BETTER_AUTH_SECRET`은 Wrangler secret으로 넣습니다. 운영 DB 연결 문자열은 Worker에 직접 넣지 않고 Hyperdrive에 설정합니다.
-4. Pages 빌드 환경 변수 `VITE_API_BASE_URL=https://api.domain.com`과 `VITE_MEDIA_BASE_URL=https://media.domain.com`을 설정합니다. `npm run build`로 웹과 API의 배포 산출물을 만듭니다. Pages 빌드 명령은 `npm run build -w @bulletin/web`, 출력 폴더는 `apps/web/dist`입니다. `public/_redirects`가 날짜별 경로 새로고침을 앱으로 돌립니다.
-5. Workers API를 `api.domain.com`에, Pages 웹을 `domain.com`에 연결합니다. 공개 R2 버킷의 커스텀 도메인을 `media.domain.com`에 연결합니다.
-6. 실제 예배·모임 시간, 교회 소개와 비전, 주소·지도 링크를 관리자 화면에서 입력합니다. 샘플 운영 정보는 기본값에 포함하지 않았습니다.
+운영 도메인과 Cloudflare·DB·Google OAuth 계정이 준비되면 [운영 배포와 점검](docs/operations.md)의 순서대로 진행합니다. `deployment/config.example.json`을 `deployment/config.local.json`으로 복사해 실제 주소·Hyperdrive ID·R2 버킷 이름을 채운 뒤 `npm run prepare:production`을 실행하면 운영용 Wrangler 설정, Pages 빌드 환경 파일, 고정 주소의 인쇄용 QR SVG가 생성됩니다. 이 파일들은 Git에 포함되지 않습니다.
 
-Cloudflare 계정, DB, 실제 도메인 및 Google OAuth 키가 있어야 운영 배포와 기기별 로그인·오프라인 확인을 마칠 수 있습니다. 배포 전에 한국 모바일 브라우저와 카카오톡 내부 브라우저에서 OAuth 복귀, 발행 직후 갱신, 오프라인 표시를 확인하세요.
+운영 자격 증명이 없어도 `npm run build`로 웹과 API 배포 산출물을 확인할 수 있습니다. 실제 계정과 기기에서 확인할 항목은 [운영 문서](docs/operations.md)에, 공식 웹사이트에서 찾은 교회 안내 후보는 [교회 안내 검토 자료](docs/site-info-review.md)에 정리했습니다.
 
 ## API
 
-공개 API는 `/v1/bulletins/current`, `/v1/bulletins`, `/v1/bulletins/:date`입니다. 관리자 API는 `/v1/admin/*`이고 모든 요청에서 Better Auth 세션과 `admin_users`를 검사합니다. 오류는 `{ "code": "...", "message": "..." }` 형태로 반환합니다. `GET /v1/bulletins/current`는 캐시하지 않아 발행 직후 같은 QR 주소에서 새 주보를 읽습니다.
+공개 API는 `/v1/health`, `/v1/bulletins/current`, `/v1/bulletins`, `/v1/bulletins/:date`입니다. 관리자 API는 `/v1/admin/*`이고 모든 요청에서 Better Auth 세션과 `admin_users`를 검사합니다. 오류는 `{ "code": "...", "message": "..." }` 형태로 반환합니다. `GET /v1/bulletins/current`는 캐시하지 않아 발행 직후 같은 QR 주소에서 새 주보를 읽습니다.
 
 ## 참고 문서
 

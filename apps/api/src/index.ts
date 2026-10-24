@@ -26,6 +26,11 @@ app.use('/api/auth/*', (c, next) => cors({ origin: c.env.WEB_ORIGIN, credentials
 app.use('/v1/*', (c, next) => cors({ origin: c.env.WEB_ORIGIN, credentials: true })(c, next));
 app.all('/api/auth/*', (c) => createAuth(c.env, c.get('pool')).handler(c.req.raw));
 
+app.get('/v1/health', async (c) => {
+  await c.get('pool').query('SELECT 1');
+  return c.json({ status: 'ok' }, 200, noStore);
+});
+
 app.use('/v1/admin/*', async (c, next) => {
   const session = await createAuth(c.env, c.get('pool')).api.getSession({ headers: c.req.raw.headers });
   if (!session) return fail('UNAUTHENTICATED', '로그인이 필요합니다.', 401);

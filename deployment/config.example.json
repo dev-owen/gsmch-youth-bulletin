@@ -1,0 +1,7 @@
+{
+  "publicOrigin": "https://bulletin.example.org",
+  "apiOrigin": "https://api.bulletin.example.org",
+  "mediaOrigin": "https://media.bulletin.example.org",
+  "hyperdriveId": "00000000-0000-0000-0000-000000000000",
+  "mediaBucket": "gsmch-youth-bulletin-media"
+}
