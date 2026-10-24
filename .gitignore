@@ -10,6 +10,7 @@ dist/
 deployment/config.local.json
 deployment/config.free.local.json
 deployment/secrets.free.local.json
+deployment/neon.connection.local
 apps/api/wrangler.production.jsonc
 apps/api/wrangler.free.jsonc
 *.dump

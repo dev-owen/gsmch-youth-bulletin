@@ -7,6 +7,7 @@
 - Cloudflare R2 버킷: `gsmch-youth-bulletin-media`. 별도의 공개 버킷 URL은 사용하지 않습니다.
 - Cloudflare Hyperdrive: `a8b2a5b323bb47df9b697d00dae78005`. Neon의 **직접 연결 주소**를 사용하며 쿼리 캐시는 비활성화했습니다.
 - Neon Free 프로젝트: `gsmch-youth-bulletin` (`flat-rice-20036914`), 기본 브랜치 `production`. Better Auth의 `user`, `session`, `account`, `verification` 테이블과 `apps/api/db/schema.sql`의 서비스 테이블을 적용했습니다.
+- Neon 접속 비밀번호는 작업 중 화면 노출 후 교체했고 Hyperdrive 연결도 갱신했습니다. 현재 직접 연결 주소는 Git에서 제외한 로컬 `deployment/neon.connection.local`에 파일 권한 0600으로 보관합니다. Neon 콘솔에 이전 비밀번호가 표시될 수 있으므로 이후 CLI 작업에는 이 로컬 파일의 주소를 사용합니다.
 - Neon 시점 복구: 2026-10-25 03:12 KST 시점에서 `restore-check-20261025` 브랜치를 만들어 11개 테이블 및 `site_info`, `site_settings`의 기본 행을 확인했습니다. 검증 브랜치는 2026-10-26 03:13 KST에 자동 삭제되도록 설정했습니다. 운영 브랜치에는 복원 내용을 덮어쓰지 않았습니다.
 
 Neon Free는 [프로젝트당 1GB, 월 100 CU-hours, 6시간 복구 범위](https://neon.com/blog/neon-free-plan-1-gb-per-project)를 제공합니다. 한도에 닿으면 서비스가 멈출 수 있습니다. Workers Free에는 [일 10만 Worker 요청과 요청당 10ms CPU 제한](https://developers.cloudflare.com/workers/platform/limits/)이 있습니다. 정적 자산 요청은 [Workers Free에서 무료](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/)입니다. Hyperdrive와 Neon의 연결이 실제 사용량과 scale-to-zero에 미치는 영향은 공개 후 Neon Usage에서 확인해야 합니다.
