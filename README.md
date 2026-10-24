@@ -49,6 +49,16 @@ psql "$DATABASE_URL" -v admin_email='관리자 이메일' -f db/grant-admin.sql
 
 승인을 취소할 때는 `DELETE FROM admin_users WHERE user_id = ...`를 실행합니다. 관리자 화면에서는 권한을 부여할 수 없습니다.
 
+## CI와 테스트
+
+GitHub Actions는 Pull Request, `main` 브랜치 푸시, 수동 실행에서 Node.js 22로 의존성을 설치하고 타입 검사, 테스트, 웹·API 빌드를 실행합니다. 같은 검증은 로컬에서 다음 명령으로 실행할 수 있습니다.
+
+```sh
+npm run ci
+```
+
+API 입력 스키마 테스트는 `apps/api/tests`에 추가합니다. 현재 테스트는 날짜, URL, 주보 입력과 교회 안내 검증을 다룹니다. Cloudflare 배포는 계정별 Worker·Pages 프로젝트, Hyperdrive ID, 도메인과 배포 비밀값 설정이 필요하므로 운영 값을 준비한 뒤 배포 자동화를 연결하세요.
+
 ## 배포 설정
 
 1. 유료 관리형 PostgreSQL과 Cloudflare R2 버킷을 준비합니다. R2에는 공개 주보 이미지 전용 버킷을 사용합니다.

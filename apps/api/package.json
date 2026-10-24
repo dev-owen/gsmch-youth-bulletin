@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "XDG_CONFIG_HOME=../../.wrangler-config WRANGLER_SEND_METRICS=false wrangler dev",
     "build": "XDG_CONFIG_HOME=../../.wrangler-config WRANGLER_SEND_METRICS=false WRANGLER_WRITE_LOGS=false wrangler deploy --dry-run --outdir dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsc --noEmit false --outDir .test-dist && node --test tests/*.test.mjs"
   },
   "dependencies": {
     "better-auth": "^1.3.0",

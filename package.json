@@ -6,6 +6,8 @@
     "dev:web": "npm run dev -w @bulletin/web",
     "dev:api": "npm run dev -w @bulletin/api",
     "build": "npm run build -w @bulletin/web && npm run build -w @bulletin/api",
-    "typecheck": "npm run typecheck -w @bulletin/web && npm run typecheck -w @bulletin/api"
+    "typecheck": "npm run typecheck -w @bulletin/web && npm run typecheck -w @bulletin/api",
+    "test": "npm run test -w @bulletin/api",
+    "ci": "npm run typecheck && npm test && npm run build"
   }
 }
