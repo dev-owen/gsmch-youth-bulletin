@@ -1,0 +1,23 @@
+{
+  "name": "@bulletin/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "XDG_CONFIG_HOME=../../.wrangler-config WRANGLER_SEND_METRICS=false wrangler dev",
+    "build": "XDG_CONFIG_HOME=../../.wrangler-config WRANGLER_SEND_METRICS=false WRANGLER_WRITE_LOGS=false wrangler deploy --dry-run --outdir dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "better-auth": "^1.3.0",
+    "hono": "^4.0.0",
+    "pg": "^8.16.3",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261024.1",
+    "@types/pg": "^8.15.0",
+    "auth": "^1.7.12",
+    "typescript": "^5.9.0",
+    "wrangler": "^4.0.0"
+  }
+}

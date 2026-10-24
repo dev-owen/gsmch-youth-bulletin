@@ -1,0 +1,12 @@
+{
+  "name": "선한목자 젊은이교회 주보",
+  "short_name": "젊은이교회 주보",
+  "lang": "ko",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f5ef",
+  "theme_color": "#f8f5ef",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

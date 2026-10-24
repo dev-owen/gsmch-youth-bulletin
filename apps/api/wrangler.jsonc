@@ -1,0 +1,14 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "gsmch-youth-bulletin-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "WEB_ORIGIN": "http://localhost:5173",
+    "PUBLIC_MEDIA_BASE_URL": "http://localhost:8787/v1/media",
+    "BETTER_AUTH_URL": "http://localhost:8787"
+  },
+  "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "REPLACE_WITH_HYPERDRIVE_ID" }],
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "gsmch-youth-bulletin-media" }]
+}
