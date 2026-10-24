@@ -8,7 +8,10 @@ dist/
 .env.local
 .env.*.local
 deployment/config.local.json
+deployment/config.free.local.json
+deployment/secrets.free.local.json
 apps/api/wrangler.production.jsonc
+apps/api/wrangler.free.jsonc
 *.dump
 *.backup
 backups/

@@ -19,22 +19,20 @@ React + Vite 공개·관리자 웹, Hono + Better Auth Workers API, PostgreSQL, 
 ```mermaid
 flowchart LR
   visitor[방문자 / 관리자 브라우저<br/>React · PWA]
-  pages[Cloudflare Pages<br/>정적 웹 · CDN]
-  worker[Cloudflare Workers<br/>Hono API · Better Auth]
+  worker[Cloudflare Workers<br/>정적 웹 · Hono API · Better Auth]
   hyperdrive[Cloudflare Hyperdrive<br/>연결 풀링]
   postgres[(Neon PostgreSQL<br/>주보 · 인증 데이터)]
   r2[(Cloudflare R2<br/>표지 이미지)]
   google[Google OAuth]
 
-  visitor -->|웹 앱 다운로드| pages
-  visitor -->|HTTPS API 요청| worker
+  visitor -->|웹 앱 다운로드 · API 요청| worker
   worker -->|SQL| hyperdrive
   hyperdrive --> postgres
   worker -->|이미지 업로드 · 조회| r2
   worker <-->|로그인 · 콜백| google
 ```
 
-웹은 Cloudflare Pages에서 정적 파일로 제공하며, 브라우저는 Workers의 Hono API를 호출합니다. API는 Hyperdrive를 통해 PostgreSQL에 연결하고, 주보 표지 이미지 파일은 R2에 저장합니다. 이미지 메타데이터와 주보 데이터는 PostgreSQL에 기록합니다. 인증은 Better Auth와 Google OAuth를 사용합니다.
+무료 배포에서는 Cloudflare Workers가 정적 웹과 Hono API를 같은 주소에서 제공합니다. API는 Hyperdrive를 통해 PostgreSQL에 연결하고, 주보 표지 이미지 파일은 R2에 저장합니다. 이미지 메타데이터와 주보 데이터는 PostgreSQL에 기록합니다. 인증은 Better Auth와 Google OAuth를 사용합니다.
 
 ### 데이터베이스 ERD
 
@@ -94,7 +92,7 @@ erDiagram
     uuid current_bulletin_id FK
   }
   admin_users {
-    text user_id PK, FK
+    text user_id PK
     timestamptz granted_at
   }
   user {
@@ -113,11 +111,11 @@ erDiagram
 | 서비스 | 무료 포함량 | 이 프로젝트에서의 용도 |
 | --- | --- | --- |
 | Cloudflare R2 Standard | 저장 10 GB-month/월, Class A 100만 건/월, Class B 1,000만 건/월, 인터넷 송신 무료 | 주보 이미지 파일. 저장량 초과분은 종량 과금 |
-| Cloudflare Workers Free | 요청 10만 건/일, CPU 10 ms/호출 | Hono API 및 Pages Functions 호출 한도 |
-| Cloudflare Pages | 정적 자산 요청 무제한·무료, 월 빌드 500회 | React 정적 웹 앱 배포 |
+| Cloudflare Workers Free | 요청 10만 건/일, CPU 10 ms/호출 | Hono API 호출 한도 |
+| Cloudflare Workers 정적 자산 | 정적 파일 요청 무료 | React 정적 웹 앱 배포 |
 | Neon Free | PostgreSQL 저장 1 GB/프로젝트, 프로젝트 100개까지, 컴퓨트 100 CU-hours/프로젝트/월, 네트워크 송신 5 GB/프로젝트/월 | PostgreSQL 데이터베이스. DB 저장 용량과 컴퓨트/송신 한도는 별도 |
 
-Cloudflare R2는 월별 저장 평균(GB-month)을 기준으로 산정하며, 10 GB-month 초과 시 저장 비용이 발생할 수 있습니다. Workers 무료 요청량은 API 호출에 적용되고 Pages 정적 파일 요청과는 별도입니다. Neon의 무료 한도는 공식 [요금 변경 안내](https://neon.com/blog/neon-free-plan-1-gb-per-project)와 [Free plan FAQ](https://neon.com/docs/introduction/plans)에 따릅니다. 그 밖의 Cloudflare 세부 한도는 [R2 가격](https://developers.cloudflare.com/r2/pricing/), [Workers 가격](https://developers.cloudflare.com/workers/platform/pricing/), [Pages 한도](https://developers.cloudflare.com/pages/platform/limits/)를 참고하세요.
+Cloudflare R2는 월별 저장 평균(GB-month)을 기준으로 산정하며, 10 GB-month 초과 시 저장 비용이 발생할 수 있습니다. Workers 무료 요청량은 API 호출에 적용되고 정적 자산 요청과는 별도입니다. Neon의 무료 한도는 공식 [요금 변경 안내](https://neon.com/blog/neon-free-plan-1-gb-per-project)와 [Free plan FAQ](https://neon.com/docs/introduction/plans)에 따릅니다. 그 밖의 Cloudflare 세부 한도는 [R2 가격](https://developers.cloudflare.com/r2/pricing/), [Workers 가격](https://developers.cloudflare.com/workers/platform/pricing/), [정적 자산 요금](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/)을 참고하세요.
 
 ## 로컬 구조
 
@@ -164,7 +162,7 @@ GitHub Actions는 Pull Request, `main` 브랜치 푸시, 수동 실행에서 Nod
 npm run ci
 ```
 
-API 입력 스키마 테스트는 `apps/api/tests`에 추가합니다. 현재 테스트는 날짜, URL, 주보 입력과 교회 안내 검증을 다룹니다. Cloudflare 배포는 계정별 Worker·Pages 프로젝트, Hyperdrive ID, 도메인과 배포 비밀값 설정이 필요하므로 운영 값을 준비한 뒤 배포 자동화를 연결하세요.
+API 입력 스키마 테스트는 `apps/api/tests`에 추가합니다. 현재 테스트는 날짜, URL, 주보 입력과 교회 안내 검증을 다룹니다. Cloudflare 무료 배포에는 Google OAuth 앱과 Worker 비밀값 설정이 필요합니다.
 
 ## 배포 설정
 
