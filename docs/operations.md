@@ -49,7 +49,7 @@ psql "$RESTORE_TEST_DATABASE_URL" -c 'SELECT count(*) FROM bulletins;'
 
 ## 3. Cloudflare 자원과 비밀값
 
-Cloudflare 계정에 로그인한 뒤 공개 주보 이미지 전용 R2 버킷을 만듭니다. [R2 공개 버킷 안내](https://developers.cloudflare.com/r2/buckets/public-buckets/)에 따라 미디어 도메인을 버킷에 연결합니다. `r2.dev` 개발 주소 대신 운영 커스텀 도메인을 사용합니다. 버킷에는 개인정보나 비공개 파일을 넣지 않습니다.
+Cloudflare 계정에 Wrangler로 로그인한 뒤 `npx wrangler whoami`로 사용할 계정을 확인합니다. 처음 R2를 사용한다면 대시보드의 **Storage & databases → R2 → Overview**에서 R2 구독을 활성화해야 합니다. 활성화 전 `npx wrangler r2 bucket list`는 오류 `10042`를 반환할 수 있습니다. [R2 시작 안내](https://developers.cloudflare.com/r2/get-started/)에 따라 계정에서 이 단계를 마친 뒤 공개 주보 이미지 전용 버킷을 만듭니다. [R2 공개 버킷 안내](https://developers.cloudflare.com/r2/buckets/public-buckets/)에 따라 미디어 도메인을 버킷에 연결합니다. `r2.dev` 개발 주소 대신 운영 커스텀 도메인을 사용합니다. 버킷에는 개인정보나 비공개 파일을 넣지 않습니다.
 
 Hyperdrive는 DB 연결 문자열로 만들고 **쿼리 캐시를 끕니다**. DB 연결 문자열은 셸 기록과 로그에 남지 않도록 입력 방법을 점검합니다. 생성된 ID를 `config.local.json`에 기록합니다.
 
