@@ -6,4 +6,14 @@ dist/
 .dev.vars
 .env
 .env.local
+.env.*.local
+deployment/config.local.json
+deployment/config.free.local.json
+deployment/secrets.free.local.json
+deployment/neon.connection.local
+apps/api/wrangler.production.jsonc
+apps/api/wrangler.free.jsonc
+*.dump
+*.backup
+backups/
 *.log

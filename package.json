@@ -1,13 +1,21 @@
 {
   "name": "gsmch-youth-bulletin",
   "private": true,
-  "workspaces": ["apps/web", "apps/api"],
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
   "scripts": {
     "dev:web": "npm run dev -w @bulletin/web",
     "dev:api": "npm run dev -w @bulletin/api",
     "build": "npm run build -w @bulletin/web && npm run build -w @bulletin/api",
     "typecheck": "npm run typecheck -w @bulletin/web && npm run typecheck -w @bulletin/api",
     "test": "npm run test -w @bulletin/api",
-    "ci": "npm run typecheck && npm test && npm run build"
+    "ci": "npm run typecheck && npm test && npm run build",
+    "prepare:production": "node deployment/prepare.mjs",
+    "prepare:free": "node deployment/prepare-free.mjs",
+    "build:free": "VITE_API_BASE_URL= VITE_MEDIA_BASE_URL= npm run build -w @bulletin/web && node deployment/prepare-free-assets.mjs && cd apps/api && WRANGLER_SEND_METRICS=false WRANGLER_WRITE_LOGS=false wrangler deploy --config wrangler.free.jsonc --dry-run --outdir dist",
+    "deploy:free": "VITE_API_BASE_URL= VITE_MEDIA_BASE_URL= npm run build -w @bulletin/web && node deployment/prepare-free-assets.mjs && cd apps/api && WRANGLER_SEND_METRICS=false WRANGLER_WRITE_LOGS=false wrangler deploy --config wrangler.free.jsonc",
+    "check:api": "node deployment/check-api.mjs"
   }
 }
