@@ -1,0 +1,11 @@
+{
+  "name": "gsmch-youth-bulletin",
+  "private": true,
+  "workspaces": ["apps/web", "apps/api"],
+  "scripts": {
+    "dev:web": "npm run dev -w @bulletin/web",
+    "dev:api": "npm run dev -w @bulletin/api",
+    "build": "npm run build -w @bulletin/web && npm run build -w @bulletin/api",
+    "typecheck": "npm run typecheck -w @bulletin/web && npm run typecheck -w @bulletin/api"
+  }
+}
