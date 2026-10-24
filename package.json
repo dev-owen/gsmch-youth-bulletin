@@ -14,8 +14,5 @@
     "ci": "npm run typecheck && npm test && npm run build",
     "prepare:production": "node deployment/prepare.mjs",
     "check:api": "node deployment/check-api.mjs"
-  },
-  "devDependencies": {
-    "qrcode": "^1.5.4"
   }
 }

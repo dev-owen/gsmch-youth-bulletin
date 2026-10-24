@@ -61,7 +61,7 @@ API 입력 스키마 테스트는 `apps/api/tests`에 추가합니다. 현재 �
 
 ## 배포 설정
 
-운영 도메인과 Cloudflare·DB·Google OAuth 계정이 준비되면 [운영 배포와 점검](docs/operations.md)의 순서대로 진행합니다. `deployment/config.example.json`을 `deployment/config.local.json`으로 복사해 실제 주소·Hyperdrive ID·R2 버킷 이름을 채운 뒤 `npm run prepare:production`을 실행하면 운영용 Wrangler 설정, Pages 빌드 환경 파일, 고정 주소의 인쇄용 QR SVG가 생성됩니다. 이 파일들은 Git에 포함되지 않습니다.
+운영 도메인과 Cloudflare·DB·Google OAuth 계정이 준비되면 [운영 배포와 점검](docs/operations.md)의 순서대로 진행합니다. `deployment/config.example.json`을 `deployment/config.local.json`으로 복사해 실제 주소·Hyperdrive ID·R2 버킷 이름을 채운 뒤 `npm run prepare:production`을 실행하면 운영용 Wrangler 설정과 Pages 빌드 환경 파일이 생성됩니다. 이 파일들은 Git에 포함되지 않습니다.
 
 운영 자격 증명이 없어도 `npm run build`로 웹과 API 배포 산출물을 확인할 수 있습니다. 실제 계정과 기기에서 확인할 항목은 [운영 문서](docs/operations.md)에, 공식 웹사이트에서 찾은 교회 안내 후보는 [교회 안내 검토 자료](docs/site-info-review.md)에 정리했습니다.
 

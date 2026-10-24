@@ -1,7 +1,6 @@
-import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import QRCode from 'qrcode';
 
 const projectRoot = fileURLToPath(new URL('../', import.meta.url));
 const inputPath = join(projectRoot, 'deployment/config.local.json');
@@ -51,12 +50,6 @@ const workerConfig = {
   hyperdrive: [{ binding: 'HYPERDRIVE', id: config.hyperdriveId }],
   r2_buckets: [{ binding: 'MEDIA', bucket_name: config.mediaBucket }],
 };
-const generatedDir = join(projectRoot, 'deployment/generated');
-await mkdir(generatedDir, { recursive: true });
 await writeFile(join(projectRoot, 'apps/api/wrangler.production.jsonc'), `${JSON.stringify(workerConfig, null, 2)}\n`);
 await writeFile(join(projectRoot, 'apps/web/.env.production.local'), `VITE_API_BASE_URL=${apiOrigin}\nVITE_MEDIA_BASE_URL=${mediaOrigin}\n`);
-const qr = await QRCode.toString(`${publicOrigin}/`, { type: 'svg', errorCorrectionLevel: 'H', margin: 4, width: 1024, color: { dark: '#182a38', light: '#ffffff' } });
-await writeFile(join(generatedDir, 'bulletin-qr.svg'), qr);
-await writeFile(join(generatedDir, 'deployment-summary.json'), `${JSON.stringify({ publicOrigin, apiOrigin, mediaOrigin, qrTarget: `${publicOrigin}/`, mediaBucket: config.mediaBucket }, null, 2)}\n`);
-console.log(`운영 설정과 QR을 생성했습니다: ${join(generatedDir, 'bulletin-qr.svg')}`);
-console.log(`QR 대상: ${publicOrigin}/`);
+console.log('운영용 Workers 설정과 Pages 빌드 환경 파일을 생성했습니다.');

@@ -4,7 +4,7 @@
 
 ## 1. 도메인과 생성 파일
 
-`deployment/config.example.json`을 `deployment/config.local.json`으로 복사하고 실제 웹·API·미디어 HTTPS 주소, Hyperdrive ID, R2 버킷 이름을 입력합니다. 파일은 Git에서 제외됩니다. 다음 명령은 운영용 Wrangler 설정, Pages 빌드 환경 파일, 인쇄용 QR SVG를 생성합니다.
+`deployment/config.example.json`을 `deployment/config.local.json`으로 복사하고 실제 웹·API·미디어 HTTPS 주소, Hyperdrive ID, R2 버킷 이름을 입력합니다. 파일은 Git에서 제외됩니다. 다음 명령은 운영용 Wrangler 설정과 Pages 빌드 환경 파일을 생성합니다.
 
 웹과 API는 같은 등록 가능 도메인의 호스트 이름을 사용해 브라우저 세션 쿠키가 정상 동작하도록 구성합니다. 예를 들어 웹이 `bulletin.example.org`라면 API는 `api.example.org`처럼 같은 사이트에 둡니다.
 
@@ -12,7 +12,7 @@
 npm run prepare:production
 ```
 
-생성되는 파일은 `apps/api/wrangler.production.jsonc`, `apps/web/.env.production.local`, `deployment/generated/bulletin-qr.svg`입니다. QR에는 **공개 웹 주소의 `/`**만 들어갑니다. 발행 후에도 같은 QR로 최신 주보를 볼 수 있으므로 인쇄 전 실제 주소와 연결 상태를 확인합니다.
+생성되는 파일은 `apps/api/wrangler.production.jsonc`와 `apps/web/.env.production.local`입니다. QR은 실제 공개 주소가 확정되고 연결된 뒤 `/` 주소로 한 번 제작합니다. 주보를 발행할 때마다 새 QR을 만들 필요는 없습니다.
 
 Pages를 Git 연동으로 빌드한다면 대시보드에도 `VITE_API_BASE_URL`과 `VITE_MEDIA_BASE_URL`을 같은 값으로 등록합니다. 로컬 생성 파일은 Git에 포함되지 않습니다. Pages의 빌드 명령은 `npm ci && npm run build -w @bulletin/web`, 출력 폴더는 `apps/web/dist`입니다.
 
