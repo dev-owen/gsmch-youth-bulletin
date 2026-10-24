@@ -36,7 +36,7 @@ const workerConfig = {
   $schema: '../../node_modules/wrangler/config-schema.json',
   name: 'gsmch-youth-bulletin-api',
   main: 'src/index.ts',
-  compatibility_date: '2026-10-25',
+  compatibility_date: '2026-10-24',
   compatibility_flags: ['nodejs_compat'],
   upload_source_maps: true,
   observability: { enabled: true, head_sampling_rate: 1 },

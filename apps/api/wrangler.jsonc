@@ -2,7 +2,7 @@
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "gsmch-youth-bulletin-api",
   "main": "src/index.ts",
-  "compatibility_date": "2026-10-25",
+  "compatibility_date": "2026-10-24",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
     "WEB_ORIGIN": "http://localhost:5173",

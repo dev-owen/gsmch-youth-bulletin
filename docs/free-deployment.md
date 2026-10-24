@@ -20,7 +20,7 @@ npm run prepare:free
 npm run build:free
 ```
 
-`prepare:free`는 `apps/api/wrangler.free.jsonc`를 생성합니다. 위 두 로컬 파일은 Git에서 제외됩니다. 생성 설정의 `WEB_ORIGIN`과 `BETTER_AUTH_URL`은 같은 Workers 주소이고, `PUBLIC_MEDIA_BASE_URL`은 그 주소의 `/v1/media`입니다. 웹 빌드에는 `VITE_API_BASE_URL`과 `VITE_MEDIA_BASE_URL`을 빈 값으로 지정하므로 브라우저 요청이 같은 출처로 갑니다. `.assetsignore`는 Pages 전용 `_redirects`를 Worker 정적 자산에서 제외합니다.
+`prepare:free`는 `apps/api/wrangler.free.jsonc`를 생성합니다. 위 두 로컬 파일은 Git에서 제외됩니다. 생성 설정의 `WEB_ORIGIN`과 `BETTER_AUTH_URL`은 같은 Workers 주소이고, `PUBLIC_MEDIA_BASE_URL`은 그 주소의 `/v1/media`입니다. 웹 빌드에는 `VITE_API_BASE_URL`과 `VITE_MEDIA_BASE_URL`을 빈 값으로 지정하므로 브라우저 요청이 같은 출처로 갑니다. 무료 Worker 빌드에서는 Pages 전용 `_redirects` 파일을 제거하고, Worker의 `not_found_handling: single-page-application` 설정으로 SPA 경로를 처리합니다. Preview URLs는 비활성화합니다.
 
 공개 배포 전 다음 세 비밀값을 준비합니다. `BETTER_AUTH_SECRET`은 32자 이상 난수로 생성합니다. Google OAuth 앱의 승인된 리디렉션 URI는 `https://gsmch-youth-bulletin.gsmch-youth-dev.workers.dev/api/auth/callback/google`입니다. Google 설정과 관리자 승인 작업은 별도 단계입니다.
 
@@ -37,6 +37,17 @@ npm run deploy:free -- --secrets-file ../../deployment/secrets.free.local.json
 배포 후 `/`, `/v1/health`, `/v1/bulletins/current`를 확인하고 `npm run check:api -- https://gsmch-youth-bulletin.gsmch-youth-dev.workers.dev 100 5`로 초기 응답 시간을 기록합니다.
 
 Google OAuth 앱과 첫 관리자 승인이 끝난 뒤 로그인 복귀, 발행 직후 갱신, 날짜별 직접 접속, 모바일 오프라인 재접속을 실제 기기에서 확인합니다. 교회 소개·모임 시간·주소는 공식 자료를 확인한 다음 관리자 화면에 입력합니다.
+
+## GitHub Actions CI/CD
+
+`.github/workflows/ci-deploy.yml`은 PR과 `main` 푸시에서 `npm run ci`를 실행합니다. PR은 검증만 수행하고, `main`에 반영되면 검증 성공 후 무료 Worker를 자동 배포합니다. 배포 자격 증명이 설정되지 않은 경우 배포 작업은 경고를 남기고 건너뜁니다. 자격 증명 등록 후에는 `main` 푸시마다 자동 배포되며, 필요할 때는 GitHub Actions에서 `main` 브랜치의 `CI and deploy` 워크플로를 수동 실행할 수 있습니다.
+
+저장소의 **Settings → Secrets and variables → Actions**에 다음 항목을 설정합니다. 비밀값은 GitHub Secrets에 넣고, 비밀이 아닌 계정 ID는 Variable로 등록합니다.
+
+- Secrets: `CLOUDFLARE_API_TOKEN`, `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+- Variables: `CLOUDFLARE_ACCOUNT_ID`
+
+Cloudflare API Token에는 해당 계정의 Workers 배포 권한이 필요합니다. `deployment/config.free.example.json`에는 공개 주소, Hyperdrive ID, R2 버킷 이름이 있어야 합니다. 배포 작업은 앱 비밀값 파일을 임시 생성해 업로드하고, 작업이 끝나면 GitHub 호스트의 임시 실행 환경이 정리합니다. 토큰이나 OAuth 비밀값을 저장소 파일이나 로그에 출력하지 않습니다.
 
 ## 복구와 사용량
 
