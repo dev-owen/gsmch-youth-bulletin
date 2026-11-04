@@ -19,8 +19,8 @@ export type CommunityNews = {
 };
 export type PromotionSchedule = { startDate: string; endDate: string; allDay: boolean; startTime: string; endTime: string };
 export type PromotionDetail = { type?: 'text' | 'schedule'; title: string; body: string; schedule?: PromotionSchedule };
-export type Promotion = { title: string; body: string; details: PromotionDetail[]; url: string };
-export type CalendarEvent = PromotionSchedule & { title: string; content: string; contact?: string; url?: string; sourceBulletinId?: string; sourceTitle?: string };
+export type Promotion = { title: string; body: string; details: PromotionDetail[]; url: string; linkLabel?: string };
+export type CalendarEvent = PromotionSchedule & { title: string; content: string; contact?: string; url?: string; linkLabel?: string; sourceBulletinId?: string; sourceTitle?: string };
 export type Bulletin = {
   id: string; serviceDate: string; theme: string; coverMediaId: string | null;
   cover: { objectKey: string; altText: string } | null;

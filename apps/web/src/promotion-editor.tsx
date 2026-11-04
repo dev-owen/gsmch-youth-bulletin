@@ -35,6 +35,7 @@ export function PromotionEditor({ value, serviceDate, onChange }: { value: Promo
         </div>
       </div>
       <label className="field">링크 <small>선택</small><input type="url" value={promotion.url} onChange={(e) => update(index, { url: e.target.value })} placeholder="https://" /></label>
+      <label className="field">버튼 이름 <small>선택</small><input value={promotion.linkLabel || ''} maxLength={60} onChange={(e) => update(index, { linkLabel: e.target.value })} placeholder="예: 신청하기, 안내 보기" /><small>비워 두면 ‘자세히 보기’로 표시됩니다. 링크를 입력하면 버튼이 나타납니다.</small></label>
     </div>)}
     <button className="add-button" disabled={value.length >= 10} onClick={() => onChange([...value, { title: '', body: '', details: [], url: '' }])}><Plus size={16} /> 광고 추가</button>
   </section>;

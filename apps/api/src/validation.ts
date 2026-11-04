@@ -91,7 +91,7 @@ export const bulletinInput = z.object({
   preacher: bounded(100),
   worshipItems: z.array(z.object({ label: required(120), content: bounded(300).default(''), assignee: bounded(100) })).max(30),
   communityNews: z.array(communityNewsInput).max(30).default([]),
-  promotions: z.array(z.object({ title: required(120), body: required(1000), details: z.array(promotionDetailInput).max(20).default([]), url: urlSchema })).max(10),
+  promotions: z.array(z.object({ title: required(120), body: required(1000), details: z.array(promotionDetailInput).max(20).default([]), url: urlSchema, linkLabel: bounded(60).default('') })).max(10),
 });
 
 const directoryGroups = z.array(z.object({ title: required(120), entries: z.array(required(500)).max(100) })).max(20);

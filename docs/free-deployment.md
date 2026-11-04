@@ -38,7 +38,7 @@ npm run deploy:free -- --secrets-file ../../deployment/secrets.free.local.json
 
 ### 기존 DB에 2026-11-05 변경 반영
 
-새 API를 배포하기 전에 `apps/api/db/migrations/20261105-bulletin-structure.sql`, `apps/api/db/migrations/20261105-recurring-info.sql`, `apps/api/db/migrations/20261105-church-events.sql`, `apps/api/db/migrations/20261105-community-news-details.sql` 순서로 운영 PostgreSQL에 적용합니다. 예배 내용·광고 세부 항목·교우 소식·공통 교회 안내와 교회 일정 저장 필드를 추가하며 기존 주보는 보존합니다. 교우 소식의 `details`에는 새가족·등반의 이름·또래 명단과 결혼의 신랑·신부·일시·장소를 저장하고, 기존 텍스트 소식도 계속 조회·수정할 수 있습니다. 새 DB는 `apps/api/db/schema.sql`로 한 번에 준비할 수 있습니다. GitHub Actions는 DB 마이그레이션을 자동 실행하지 않습니다.
+새 API를 배포하기 전에 `apps/api/db/migrations/20261105-bulletin-structure.sql`, `apps/api/db/migrations/20261105-recurring-info.sql`, `apps/api/db/migrations/20261105-church-events.sql`, `apps/api/db/migrations/20261105-community-news-details.sql`, `apps/api/db/migrations/20261105-promotion-link-label.sql` 순서로 운영 PostgreSQL에 적용합니다. 예배 내용·광고 세부 항목·교우 소식·공통 교회 안내와 교회 일정 저장 필드를 추가하며 기존 주보는 보존합니다. 교우 소식의 `details`에는 새가족·등반의 이름·또래 명단과 결혼의 신랑·신부·일시·장소를 저장하고, 기존 텍스트 소식도 계속 조회·수정할 수 있습니다. 새 DB는 `apps/api/db/schema.sql`로 한 번에 준비할 수 있습니다. GitHub Actions는 DB 마이그레이션을 자동 실행하지 않습니다.
 
 결혼 소식은 하나의 항목에 최대 30커플을 등록합니다. 각 커플의 신랑·신부 이름과 또래, 일시, 장소는 `details.weddings` 배열에 저장합니다. 이전 `details.wedding` 단일 커플 데이터도 그대로 조회·편집할 수 있으며, 기존 JSON 컬럼을 사용하므로 추가 DB 마이그레이션은 필요하지 않습니다.
 

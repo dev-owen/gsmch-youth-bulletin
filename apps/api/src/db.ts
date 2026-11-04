@@ -29,7 +29,7 @@ export async function getBulletin(db: Queryable, condition: string, value: strin
   const [items, community, promotions] = await Promise.all([
     db.query<{ label: string; content: string; assignee: string }>('SELECT label, content, assignee FROM worship_items WHERE bulletin_id = $1 ORDER BY position', [b.id]),
     db.query<{ category: string; content: string; details: Pick<BulletinInput['communityNews'][number], 'people' | 'wedding' | 'weddings'> }>('SELECT category, content, details FROM community_news WHERE bulletin_id = $1 ORDER BY position', [b.id]),
-    db.query<{ title: string; body: string; details: BulletinInput['promotions'][number]['details']; url: string | null }>('SELECT title, body, details, url FROM promotions WHERE bulletin_id = $1 ORDER BY position', [b.id]),
+    db.query<{ title: string; body: string; details: BulletinInput['promotions'][number]['details']; url: string | null; link_label: string | null }>('SELECT title, body, details, url, link_label FROM promotions WHERE bulletin_id = $1 ORDER BY position', [b.id]),
   ]);
   return {
     id: b.id, serviceDate: b.service_date, theme: b.theme, coverMediaId: b.cover_media_id,
@@ -37,14 +37,14 @@ export async function getBulletin(db: Queryable, condition: string, value: strin
     sermonTitle: b.sermon_title, scripture: b.scripture, preacher: b.preacher,
     status: b.status, publishedAt: b.published_at,
     worshipItems: items.rows, communityNews: community.rows.map(({ details, ...news }) => ({ ...news, ...details })),
-    promotions: promotions.rows.map((p) => ({ ...p, url: p.url ?? '' })),
+    promotions: promotions.rows.map(({ link_label, ...p }) => ({ ...p, url: p.url ?? '', linkLabel: link_label ?? '' })),
   };
 }
 
 // Read from the source advertisements so edits and removals cannot leave stale calendar entries.
 export async function getPromotionCalendarEvents(db: Queryable) {
-  const result = await db.query<{ bulletin_id: string; title: string; body: string; details: BulletinInput['promotions'][number]['details']; url: string | null }>(
-    `SELECT p.bulletin_id, p.title, p.body, p.details, p.url FROM promotions p
+  const result = await db.query<{ bulletin_id: string; title: string; body: string; details: BulletinInput['promotions'][number]['details']; url: string | null; link_label: string | null }>(
+    `SELECT p.bulletin_id, p.title, p.body, p.details, p.url, p.link_label FROM promotions p
       JOIN bulletins b ON b.id = p.bulletin_id
       WHERE b.status = 'published' AND EXISTS (
         SELECT 1 FROM jsonb_array_elements(p.details) AS detail WHERE detail->>'type' = 'schedule'
@@ -53,7 +53,7 @@ export async function getPromotionCalendarEvents(db: Queryable) {
   return result.rows.flatMap((promotion) => promotion.details.flatMap((detail) => {
     if (detail.type !== 'schedule' || !detail.schedule) return [];
     return [{ ...detail.schedule, title: detail.title, content: detail.body || promotion.body,
-      url: promotion.url || '', sourceBulletinId: promotion.bulletin_id, sourceTitle: promotion.title }];
+      url: promotion.url || '', linkLabel: promotion.link_label || '', sourceBulletinId: promotion.bulletin_id, sourceTitle: promotion.title }];
   }));
 }
 
@@ -89,8 +89,8 @@ export async function replaceBulletin(client: PoolClient, id: string, data: Bull
     [id, JSON.stringify(data.communityNews.map(({ category, content, people, wedding, weddings }) => ({ category, content, details: { people, wedding, weddings } })))]
   );
   if (data.promotions.length) await client.query(
-    `INSERT INTO promotions (bulletin_id, position, title, body, details, url)
-     SELECT $1, ordinality - 1, item->>'title', item->>'body', item->'details', NULLIF(item->>'url', '')
+    `INSERT INTO promotions (bulletin_id, position, title, body, details, url, link_label)
+     SELECT $1, ordinality - 1, item->>'title', item->>'body', item->'details', NULLIF(item->>'url', ''), COALESCE(item->>'linkLabel', '')
      FROM jsonb_array_elements($2::jsonb) WITH ORDINALITY AS x(item, ordinality)`,
     [id, JSON.stringify(data.promotions)]
   );

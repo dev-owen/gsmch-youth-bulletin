@@ -51,7 +51,7 @@ test('accepts optional worship content and retains all four community news categ
 test('retains multiple announcement details and rejects incomplete detail entries', () => {
   const promotion = { title: '수련회', body: '참여 신청 안내', details: [{ title: '일시', body: '토요일 오전 10시' }, { title: '장소', body: '본당' }], url: '' };
   const input = bulletinInput.parse({ ...validBulletin, promotions: [promotion] });
-  assert.deepEqual(input.promotions[0], promotion);
+  assert.deepEqual(input.promotions[0], { ...promotion, linkLabel: '' });
   assert.deepEqual(bulletinInput.parse(validBulletin).promotions[0].details, []);
   assert.equal(bulletinInput.safeParse({ ...validBulletin, promotions: [{ ...promotion, details: [{ title: ' ', body: '내용' }] }] }).success, false);
   assert.equal(bulletinInput.safeParse({ ...validBulletin, promotions: [{ ...promotion, details: [{ title: '제목', body: ' ' }] }] }).success, false);

@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS promotions (
   title text NOT NULL,
   body text NOT NULL,
   url text,
+  link_label text NOT NULL DEFAULT '',
   details jsonb NOT NULL DEFAULT '[]'::jsonb,
   UNIQUE (bulletin_id, position)
 );
@@ -58,6 +59,7 @@ CREATE TABLE IF NOT EXISTS community_news (
 ALTER TABLE worship_items ADD COLUMN IF NOT EXISTS content text NOT NULL DEFAULT '';
 ALTER TABLE community_news ADD COLUMN IF NOT EXISTS details jsonb NOT NULL DEFAULT '{}'::jsonb;
 ALTER TABLE promotions ADD COLUMN IF NOT EXISTS details jsonb NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE promotions ADD COLUMN IF NOT EXISTS link_label text NOT NULL DEFAULT '';
 ALTER TABLE promotions DROP CONSTRAINT IF EXISTS promotions_position_check;
 ALTER TABLE promotions ADD CONSTRAINT promotions_position_check CHECK (position BETWEEN 0 AND 9);
 

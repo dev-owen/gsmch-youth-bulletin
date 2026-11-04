@@ -4,7 +4,7 @@ export function promotionCalendarEvents(bulletin: Bulletin): CalendarEvent[] {
   return bulletin.promotions.flatMap((promotion) => (promotion.details || []).flatMap((detail) => {
     if (detail.type !== 'schedule' || !detail.schedule?.startDate) return [];
     return [{ ...detail.schedule, endDate: detail.schedule.endDate || detail.schedule.startDate,
-      title: detail.title, content: detail.body || promotion.body, url: promotion.url,
+      title: detail.title, content: detail.body || promotion.body, url: promotion.url, linkLabel: promotion.linkLabel || '',
       sourceBulletinId: bulletin.id, sourceTitle: promotion.title }];
   }));
 }
