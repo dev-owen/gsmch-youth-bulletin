@@ -70,3 +70,16 @@
 .site-info-save{margin-top:22px}
 @container(max-width:650px){.meeting-grid,.vision-points,.offering-instructions{grid-template-columns:1fr}.meeting-card{padding:23px}.meeting-card h4{margin:8px 0 14px}.vision-points{gap:20px}.vision-points>div+div{border-top:1px solid #53616a;padding-top:19px}.offering-instructions{gap:23px}.newcomer-card{padding:24px 20px;gap:13px}.offering-card,.vision-card{padding:25px}.vision-statement{font-size:22px}.guide-section-heading h3{font-size:20px}}
 @container(max-width:440px){.directory-grid,.church-visit{grid-template-columns:1fr}.offering-account{align-items:flex-start;flex-direction:column;gap:15px}.account-number{font-size:25px}.copy-account{width:100%}.newcomer-card{display:block}.newcomer-symbol{width:42px;margin-bottom:14px}.guide-nav a{font-size:12px;padding:9px 11px}.guide-section-heading{align-items:flex-start}.guide-section-heading>svg{margin-top:5px}}
+
+/* Blue-gray finish shared with the bulletin and admin views */
+.guide-nav{border-color:#dce6ee}.guide-nav a{background:#edf3f7;color:#526b80}.guide-nav a:hover{background:#e1ebf2}
+.guide-nav a:focus-visible,.church-guide summary:focus-visible,.copy-account:focus-visible{outline-color:#527b9d}
+.guide-section-heading>svg{color:#6485a0}.guide-label{color:#617d95}
+.newcomer-card{background:#edf4f8;border-color:#dce8f0}.newcomer-symbol{background:#fff;color:#527b99}.newcomer-card .guide-label{color:#527b99}.newcomer-card p{color:#4d6274}
+.meeting-card,.offering-card,.directory-card{background:#fff;border-color:#e0e8ef}
+.meeting-schedule{color:#395a73}.meeting-location{color:#66798a}.meeting-schedule svg,.meeting-location svg{color:#6f8ea8}
+.guide-detail{border-color:#e0e8ef}.guide-detail summary{color:#536e84}.guide-detail p{color:#627383}.guide-detail .meeting-contact{color:#52748f}
+.account-number{color:#28445b}.copy-account{border-color:#d4e1ea;background:#f0f5f8;color:#456680}.copy-account:hover{background:#e7f0f5}.copy-feedback{color:#4c718e}
+.offering-instructions{border-color:#e0e8ef}.offering-instructions p{color:#66798a}.transfer-example{color:#4d708a;background:#edf3f7}
+.vision-card{background:#1d3b55;color:#f3f7fa}.vision-introduction{color:#d0dde7}.vision-reference,.vision-points h4{color:#b8cee0}.vision-points{border-color:#536e83}.vision-points p{color:#dce6ed}.vision-points small{color:#b6c7d4}
+.guide-description{color:#718292}.directory-meta{color:#7f91a0}.mission-list li,.staff-list dd{color:#586e80;border-color:#e5ecf1}.staff-list dt{color:#617e96}.directory-note,.church-visit p{color:#7a8996}.church-visit{border-color:#dce6ee}.recurring-fieldset{border-color:#dce6ee}.recurring-fieldset legend{color:#526f86}.editor-field-help{color:#788997}
