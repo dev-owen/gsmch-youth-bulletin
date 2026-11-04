@@ -11,6 +11,7 @@
 .calendar-event .calendar-event-schedule{color:#527a99;font-size:.8125rem;font-weight:600}
 .calendar-source{display:block;margin-bottom:5px;color:#8293a2;font-size:.75rem}
 .calendar-event>div{overflow-wrap:anywhere}
+.announcement-body>.promotion-detail:has(+.promotion-link-button){border-bottom:0}
 .promotion-link-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;max-width:100%;min-height:44px;padding:10px 16px;border:1px solid #244965;border-radius:6px;background:#244965;color:#fff;font-size:.8125rem;font-weight:700;line-height:1.6;text-align:center;text-decoration:none;overflow-wrap:anywhere}
 .promotion-link-button:hover{background:#315f80;border-color:#315f80;color:#fff}
 .promotion-link-button:focus-visible{outline:2px solid #527b9d;outline-offset:3px}
