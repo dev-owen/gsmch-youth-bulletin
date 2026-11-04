@@ -70,9 +70,7 @@ export function BulletinContent({ data, offline = false, preview = false }: { da
           <div className="worship-list">{bulletin.worshipItems.map((item, index) => <div className="worship-row" key={`${index}-${item.label}`}><span className="worship-index">{String(index + 1).padStart(2, '0')}</span><span className="worship-label">{item.label}{item.content && <small className="worship-content">{item.content}</small>}</span><span className="worship-assignee">{item.assignee}</span></div>)}</div>
         </section>
         <section id="message" className="content-section message-section"><SectionHeading number="02" kicker="THE MESSAGE" title="오늘의 말씀" icon={<BookOpen size={23} />} />
-          <CompactDisclosure title="오늘의 말씀" preview={bulletin.sermonTitle} meta={bulletin.scripture} icon={<BookOpen size={20} />} level={2}>
           <div className="sermon-card"><span className="sermon-mark">“</span><p className="sermon-scripture">{bulletin.scripture}</p><h3>{bulletin.sermonTitle}</h3><div className="sermon-preacher"><span className="small-rule" />{bulletin.preacher}</div></div>
-          </CompactDisclosure>
         </section>
         {bulletin.communityNews?.length > 0 && <section id="news" className="content-section community-section"><SectionHeading number="03" kicker="COMMUNITY NEWS" title="교우 소식" icon={<Sparkles size={23} />} /><div className="community-news-grid" aria-label="교우 소식">{bulletin.communityNews.map((news, index) => <article className="promotion-card" key={`${index}-${news.category}`}><span className="promotion-number">{news.category}</span><div><CommunityNewsContent news={news} /></div></article>)}</div></section>}
       </div>

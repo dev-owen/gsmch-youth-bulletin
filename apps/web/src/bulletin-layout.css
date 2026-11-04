@@ -136,7 +136,7 @@ body:has(.public-shell){min-width:0}
 
 .bulletin-body.is-compact{gap:24px;padding-top:18px}
 .is-compact .bulletin-overview,.is-compact .bulletin-updates{gap:16px}
-.is-compact .message-section>.section-heading,.is-compact .church-calendar>.section-heading,.is-compact .guide-section>.guide-section-heading,.is-compact .guide-nav{display:none}
+.is-compact .church-calendar>.section-heading,.is-compact .guide-section>.guide-section-heading,.is-compact .guide-nav{display:none}
 .bulletin-body.is-compact .section-heading{margin-bottom:12px}
 .bulletin-body.is-compact .section-heading h2{font-size:1.25rem}
 .bulletin-body.is-compact .content-section{transition-duration:.24s}
