@@ -93,15 +93,18 @@ html{font-size:100%}
 @media(max-width:760px){.announcement-card summary{grid-template-columns:2.625rem minmax(0,1fr) auto}}
 .community-person-editor{padding:12px;background:#f5f8fa;border:1px solid #e1e9f0;border-radius:4px;margin-top:12px}
 .community-person-editor .field{margin-bottom:0}
-.community-people{list-style:none;margin:0;padding:0;display:grid;gap:9px;color:#4d6274;font-size:0.9375rem;line-height:1.7}
-.community-peer{color:#738697;font-size:0.875rem}
-.community-wedding{margin:0;display:grid;gap:10px;font-size:0.875rem;line-height:1.7}
-.community-wedding>div{display:grid;grid-template-columns:2rem minmax(0,1fr);gap:10px}
-.community-wedding dt{color:#527b99;font-weight:700}
-.community-wedding dd{margin:0;color:#4d6274;white-space:pre-line;overflow-wrap:anywhere}
+.community-people{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:3px 14px;color:#4d6274;font-size:0.8125rem;line-height:1.7}
+.community-people li{max-width:100%;overflow-wrap:anywhere}
+.community-peer{color:#738697;font-size:0.75rem}
+.community-weddings{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;padding-bottom:2px}
+.community-weddings:focus-visible{outline:2px solid #527b9d;outline-offset:3px;border-radius:3px}
+.community-wedding{margin:0;display:flex;align-items:baseline;gap:12px;min-width:max-content;font-size:0.8125rem;line-height:1.7}
+.community-wedding>div{display:flex;align-items:baseline;flex-shrink:0;gap:4px}
+.community-wedding dt{color:#527b99;font-size:0.6875rem;font-weight:700}
+.community-wedding dd{margin:0;color:#4d6274;white-space:nowrap}
 .community-legacy{white-space:pre-line}
 .community-wedding-editor{padding:14px;background:#f5f8fa;border:1px solid #e1e9f0;border-radius:4px;margin-top:12px}
 .community-wedding-editor .field:last-child{margin-bottom:0}
-.community-wedding+.community-wedding{border-top:1px solid #e1e9f0;margin-top:20px;padding-top:20px}
+.community-wedding+.community-wedding{border-top:1px solid #e1e9f0;margin-top:6px;padding-top:6px}
 @media(max-width:500px){.community-person-editor .field+.field{margin-top:12px}}
 .toast-viewport{position:fixed;z-index:1000;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(92vw,460px);pointer-events:none;display:grid;justify-items:center}.app-toast{pointer-events:auto;width:100%;padding:14px 18px;border-radius:8px;background:#213b4b;color:#fff;box-shadow:0 8px 28px rgba(20,36,43,.24);font-size:.875rem;line-height:1.5;text-align:center;animation:toast-in .18s ease-out}.app-toast.error{background:#9b3e35}.app-toast.success{background:#276447}@keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}

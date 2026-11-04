@@ -25,11 +25,11 @@ body:has(.public-shell){min-width:0}
 .bulletin-body .sermon-scripture{margin-bottom:14px;line-height:1.7}
 .bulletin-body .sermon-card h3{font-size:1.625rem;line-height:1.5;margin-bottom:20px;word-break:keep-all}
 .bulletin-body .sermon-mark{top:16px;right:20px;font-size:4rem;pointer-events:none}
-.community-news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:10px}
-.community-news-grid .promotion-card{min-width:0;min-height:0;grid-template-columns:3rem minmax(0,1fr);align-items:start;gap:12px;padding:16px 18px}
+.community-news-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+.community-news-grid .promotion-card{min-width:0;min-height:0;grid-template-columns:2.5rem minmax(0,1fr);align-items:start;gap:8px;padding:10px 14px}
 .community-news-grid .promotion-number{font-family:inherit;font-size:.875rem;font-weight:700;line-height:1.7;color:#527a99}
 .community-news-grid .promotion-card p{margin:0;line-height:1.7}
-.community-news-grid .community-people{gap:4px}
+.community-news-grid .community-people{gap:3px 14px}
 .bulletin-body .promotion-list{gap:10px;align-items:start}
 .bulletin-body .announcement-card summary{grid-template-columns:1.75rem minmax(0,1fr) auto;min-height:72px;padding:17px 18px;gap:10px}
 .bulletin-body .announcement-card summary strong{font-size:1rem;line-height:1.6}
@@ -69,8 +69,9 @@ body:has(.public-shell){min-width:0}
 /* Use available content width, so text scaling and the editor preview reflow too. */
 @container(min-width:52rem){
   .bulletin-overview{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);column-gap:36px;row-gap:28px;align-items:start}
-  .bulletin-overview .worship-section{grid-column:1;grid-row:1 / span 2}
-  .bulletin-overview .message-section,.bulletin-overview .community-section{grid-column:2}
+  .bulletin-overview .worship-section{grid-column:1;grid-row:1}
+  .bulletin-overview .message-section{grid-column:2}
+  .bulletin-overview .community-section{grid-column:1 / -1}
   .bulletin-updates:has(>#announcements){grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:36px;align-items:start}
   .directory-grid:not(.staff-directory){grid-template-columns:repeat(3,minmax(0,1fr))}
 }
@@ -94,7 +95,7 @@ body:has(.public-shell){min-width:0}
   .bulletin-body .sermon-card{padding:24px}
   .bulletin-body .sermon-card h3{font-size:1.5rem}
   .bulletin-body .announcement-body{padding-left:18px}
-  .community-news-grid .promotion-card{padding:14px 16px}
+  .community-news-grid .promotion-card{padding:10px 12px}
   .site-footer{min-height:0;padding-block:24px}
 }
 
