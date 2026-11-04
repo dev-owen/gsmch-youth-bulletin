@@ -6,6 +6,7 @@ import { AdminPage } from './admin';
 import { PublicLanguageLayout } from './language';
 import './styles.css';
 import './bulletin-layout.css';
+import './reading-theme.css';
 
 function ToastViewport() {
   const [toast, setToast] = useState<{ message: string; kind: 'success' | 'error' } | null>(null);

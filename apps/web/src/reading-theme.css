@@ -1,0 +1,95 @@
+:root[data-reading-theme=light]{color-scheme:light}
+:root[data-reading-theme=dark]{
+  color-scheme:dark;
+  --reading-page:#0f1720;
+  --reading-surface:#172330;
+  --reading-raised:#203142;
+  --reading-border:#344a5c;
+  --reading-text:#e4edf5;
+  --reading-secondary:#b7c8d6;
+  --reading-muted:#a1b4c4;
+  --reading-accent:#9cc9e8;
+  background:var(--reading-page);
+  color:var(--reading-text);
+}
+:root[data-reading-theme=dark] :is(body,.public-shell){background:var(--reading-page);color:var(--reading-text)}
+:root[data-reading-theme=dark] .site-header{background:#131e29;border-color:var(--reading-border)}
+:root[data-reading-theme=dark] :is(.brand-symbol,.archive-calendar,.info-icon){border-color:#65839b;color:var(--reading-accent)}
+:root[data-reading-theme=dark] :is(.brand small,.header-link,.back-link,.site-footer,.site-footer small,.site-footer a,.archive-item small,.archive-item>svg){color:var(--reading-secondary)}
+:root[data-reading-theme=dark] :is(.header-link:hover,.back-link:hover,.text-link:hover){color:#c3e1f5}
+:root[data-reading-theme=dark] :is(.section-heading h2,.compact-heading button,.account-number){color:var(--reading-text)}
+:root[data-reading-theme=dark] :is(.eyebrow.dark,.section-kicker,.section-icon,.worship-index,.promotion-number,.announcement-chevron,.compact-icon,.compact-chevron,.guide-label,.guide-section-heading>svg,.community-wedding dt,.staff-list dt){color:var(--reading-accent)}
+:root[data-reading-theme=dark] :is(.worship-assignee,.worship-content,.promotion-card p,.announcement-body>p,.info-card p,.sermon-preacher,.compact-preview,.community-people,.community-wedding dd,.newcomer-card p,.meeting-schedule,.meeting-location,.guide-detail p,.guide-detail .meeting-contact,.offering-account p,.offering-instructions p,.mission-list li,.staff-list dd,.church-visit p){color:var(--reading-secondary)}
+:root[data-reading-theme=dark] :is(.compact-meta,.community-peer,.announcement-card summary small,.swipe-hint,.guide-description,.directory-meta,.directory-note,.calendar-source,.calendar-empty-note,.calendar-marker-help){color:var(--reading-muted)}
+:root[data-reading-theme=dark] :is(.worship-list,.worship-row,.site-footer,.archive-heading,.archive-item,.calendar-month,.calendar-grid,.calendar-table,.calendar-event,.promotion-details,.promotion-detail,.guide-nav,.guide-detail,.offering-instructions,.church-visit,.mission-list li,.staff-list>div,.community-wedding+.community-wedding){border-color:var(--reading-border)}
+:root[data-reading-theme=dark] :is(.promotion-card,.info-card,.meeting-card,.offering-card,.directory-card,.is-compact .compact-disclosure){background:var(--reading-surface);border-color:var(--reading-border)}
+:root[data-reading-theme=dark] .offering-card .compact-disclosure{background:transparent}
+:root[data-reading-theme=dark] :is(.sermon-card,.newcomer-card,.empty-bulletin){background:var(--reading-raised);border-color:var(--reading-border)}
+:root[data-reading-theme=dark] .sermon-card:after{border-color:var(--reading-border)}
+:root[data-reading-theme=dark] .sermon-mark{color:#58758b}
+:root[data-reading-theme=dark] :is(.sermon-scripture,.text-link,.status-panel a,.calendar-event a,.calendar-event .calendar-event-schedule,.promotion-detail strong,.promotion-schedule,.meeting-schedule svg,.meeting-location svg,.guide-detail summary,.copy-feedback){color:var(--reading-accent)}
+:root[data-reading-theme=dark] .small-rule{background:var(--reading-accent)}
+:root[data-reading-theme=dark] .reading-progress span{background:var(--reading-accent)}
+:root[data-reading-theme=dark] .reading-nav{background:rgba(15,23,32,.95);border-color:var(--reading-border)}
+:root[data-reading-theme=dark] :is(.reading-nav a,.guide-nav a,.copy-account,.transfer-example){background:var(--reading-raised);border-color:var(--reading-border);color:var(--reading-secondary)}
+:root[data-reading-theme=dark] :is(.reading-nav a:hover,.reading-nav a:focus-visible,.guide-nav a:hover,.copy-account:hover){background:#2c455b;border-color:#63839c;color:var(--reading-text)}
+:root[data-reading-theme=dark] .newcomer-symbol{background:var(--reading-surface);color:var(--reading-accent)}
+:root[data-reading-theme=dark] .newcomer-card .guide-label{color:var(--reading-accent)}
+:root[data-reading-theme=dark] .vision-card{background:#152d40;color:var(--reading-text)}
+:root[data-reading-theme=dark] :is(.vision-introduction,.vision-points p,.vision-points small){color:var(--reading-secondary)}
+:root[data-reading-theme=dark] :is(.vision-reference,.vision-points h4){color:var(--reading-accent)}
+:root[data-reading-theme=dark] :is(.vision-points,.vision-points>div+div){border-color:#45617a}
+:root[data-reading-theme=dark] .archive-cta{background:#203f57;color:var(--reading-text)}
+:root[data-reading-theme=dark] .archive-cta:hover{background:#2c526e}
+:root[data-reading-theme=dark] .archive-cta small{color:var(--reading-accent)}
+:root[data-reading-theme=dark] .archive-item:hover{background:var(--reading-surface)}
+:root[data-reading-theme=dark] :is(.archive-heading p,.empty-bulletin p,.status-panel){color:var(--reading-secondary)}
+:root[data-reading-theme=dark] :is(.empty-symbol,.site-footer>span){color:var(--reading-accent)}
+:root[data-reading-theme=dark] :is(.load-more,.simple-button,.calendar-nav){border-color:var(--reading-border);color:var(--reading-secondary)}
+:root[data-reading-theme=dark] :is(.calendar-nav:hover,.swipe-controls>button:hover:not(:disabled)){background:var(--reading-raised)}
+:root[data-reading-theme=dark] :is(.calendar-weekday,.calendar-event p,.calendar-event time){color:var(--reading-secondary)}
+:root[data-reading-theme=dark] :is(.calendar-day,.church-calendar .calendar-day>time){color:var(--reading-text)}
+:root[data-reading-theme=dark] .calendar-day.has-event{color:var(--reading-accent)}
+:root[data-reading-theme=dark] :is(.calendar-day i,.swipe-pagination [aria-current=true] span){background:var(--reading-accent)}
+:root[data-reading-theme=dark] .swipe-controls button{color:var(--reading-accent)}
+:root[data-reading-theme=dark] .swipe-pagination span{background:#597083}
+:root[data-reading-theme=dark] .loading-spinner{border-color:var(--reading-border);border-top-color:var(--reading-accent)}
+/* Keep each calendar event's identifying color against the dark surface. */
+:root[data-reading-theme=dark] :is(.calendar-marker:not(.calendar-dot),.calendar-colored-event .calendar-event-date){
+  background:var(--reading-raised);
+  background:color-mix(in srgb,var(--event-color) 18%,var(--reading-surface));
+  color:var(--reading-text);
+  color:color-mix(in srgb,var(--event-color) 35%,white);
+  border-color:var(--reading-border);
+}
+:root[data-reading-theme=dark] :is(.calendar-dot,.calendar-event-color){background:color-mix(in srgb,var(--event-color) 60%,white)}
+:root[data-reading-theme=dark] .calendar-colored-event{border-left-color:color-mix(in srgb,var(--event-color) 60%,white)}
+/* Action buttons and focus rings stay distinct from the surrounding cards. */
+:root[data-reading-theme=dark] .promotion-link-button{background:#315f80;border-color:#6c9bbd;color:#fff}
+:root[data-reading-theme=dark] .calendar-event .promotion-link-button{color:#fff}
+:root[data-reading-theme=dark] .promotion-link-button:hover{background:#3b6e91;color:#fff}
+:root[data-reading-theme=dark] :is(.reading-nav a,.guide-nav a,.copy-account,.promotion-link-button,.calendar-nav,.compact-heading button,.swipe-track,.swipe-controls button,.church-guide summary):focus-visible{outline-color:var(--reading-accent)}
+/* The settings panel uses the same palette as the bulletin. */
+:root[data-reading-theme=dark] :is(.reading-settings-trigger,.reading-settings-panel,.reading-size-reset){background:var(--reading-surface);border-color:var(--reading-border);color:var(--reading-text)}
+:root[data-reading-theme=dark] .reading-settings-trigger[aria-expanded=true],
+:root[data-reading-theme=dark] .reading-settings-trigger:hover,
+:root[data-reading-theme=dark] .reading-size-reset:hover:not(:disabled){background:var(--reading-raised);border-color:#63839c;color:var(--reading-accent)}
+:root[data-reading-theme=dark] :is(.reading-settings-close,.reading-size-controls button){background:var(--reading-raised);border-color:#63839c;color:var(--reading-accent)}
+:root[data-reading-theme=dark] :is(.reading-settings-close:hover,.reading-size-controls button:hover:not(:disabled)){background:#2c455b}
+:root[data-reading-theme=dark] :is(.reading-settings-label,.reading-theme-toggle,.reading-theme-status){color:var(--reading-secondary)}
+:root[data-reading-theme=dark] .reading-settings-help{color:var(--reading-muted)}
+:root[data-reading-theme=dark] .reading-theme-setting{border-color:var(--reading-border)}
+:root[data-reading-theme=dark] .reading-theme-toggle[aria-checked=true] .reading-theme-track{background:var(--reading-accent)}
+:root[data-reading-theme=dark] .reading-theme-track>span{background:#172330}
+:root[data-reading-theme=dark] .reading-settings button:focus-visible{outline-color:var(--reading-accent)}
+:root[data-reading-theme=dark] :is(.language-selector,.language-selector select){background:var(--reading-surface);border-color:var(--reading-border);color:var(--reading-secondary)}
+:root[data-reading-theme=dark] .language-selector select:hover{background:var(--reading-raised);color:var(--reading-accent)}
+:root[data-reading-theme=dark] .language-selector select:focus-visible{outline-color:var(--reading-accent)}
+/* Only the dialog surrounding the QR changes; the scannable code stays white. */
+:root[data-reading-theme=dark] .bulletin-qr-dialog{background:var(--reading-surface);border-color:var(--reading-border);color:var(--reading-text)}
+:root[data-reading-theme=dark] :is(.bulletin-qr-kicker,.bulletin-qr-link,.bulletin-qr-notice){color:var(--reading-accent)}
+:root[data-reading-theme=dark] :is(.bulletin-qr-date,.bulletin-qr-description){color:var(--reading-secondary)}
+:root[data-reading-theme=dark] .bulletin-qr-close{background:var(--reading-raised);color:var(--reading-accent)}
+:root[data-reading-theme=dark] .bulletin-qr-close:hover{background:#2c455b}
+:root[data-reading-theme=dark] .bulletin-qr-image{border-color:var(--reading-border)}
+:root[data-reading-theme=dark] .bulletin-qr-dialog :is(button,a):focus-visible{outline-color:var(--reading-accent)}

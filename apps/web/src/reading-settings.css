@@ -20,6 +20,17 @@
 .reading-size-reset{width:100%;min-height:44px;margin-top:14px;padding:10px;border:1px solid #dce6ee;border-radius:8px;background:#fff;color:#526a7e;font-size:.8125em;font-weight:700}
 .reading-size-reset:hover:not(:disabled){background:#f0f5f8}
 .reading-settings-help{margin:14px 0 0;color:#7a8d9e;font-size:.75em;line-height:1.7}
+.reading-theme-setting{margin-top:16px;padding-top:8px;border-top:1px solid #e1e9f0}
+.reading-theme-toggle{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:52px;padding:10px 0;border:0;border-radius:4px;background:transparent;color:#526a7e;font-size:.875em;font-weight:700;text-align:left}
+.reading-theme-label,.reading-theme-control{display:flex;align-items:center;gap:8px}
+.reading-theme-label{min-width:0}
+.reading-theme-control{flex-shrink:0;margin-inline-start:auto}
+.reading-theme-status{font-size:.8125em;font-weight:400;color:#627383}
+.reading-theme-track{display:block;width:42px;height:26px;padding:3px;border-radius:20px;background:#c7d6e2;transition:background .18s}
+.reading-theme-track>span{display:block;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(15,32,46,.2);transition:transform .18s}
+.reading-theme-toggle[aria-checked=true] .reading-theme-track{background:#527b9d}
+.reading-theme-toggle[aria-checked=true] .reading-theme-track>span{transform:translateX(16px)}
+@media(prefers-reduced-motion:reduce){.reading-theme-track,.reading-theme-track>span{transition:none}}
 @media(max-width:500px){.header-actions{gap:9px}.reading-settings-trigger{padding:10px}.reading-settings-trigger>span{display:none}}
 
 /* Stack the assignee when OS text size and the reader's setting leave little room. */
