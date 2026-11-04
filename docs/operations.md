@@ -34,7 +34,10 @@ psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/schema.sql
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/migrations/20261105-church-events.sql
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/migrations/20261105-community-news-details.sql
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/migrations/20261105-promotion-link-label.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/migrations/20261105-worship-sermon-type.sql
 ```
+
+설교 타입 마이그레이션은 기존 `설교` 순서에 주보의 설교 주제·말씀 구절을 연결합니다. 새 주보에는 순서명과 타입만 복제하며, 주제·구절·담당자는 비웁니다. 설교 내용은 `worship_items.sermon`에 저장하고 첫 번째 설교를 ‘오늘의 말씀’과 함께 사용합니다. 초안은 빈 값을 저장할 수 있고 발행할 때 두 내용과 설교자를 모두 확인합니다.
 
 `BETTER_AUTH_SECRET`도 이 셸에 설정해야 합니다. 운영 비밀값은 Git에 넣지 않습니다. `auth.config.ts`는 CLI가 인증 테이블을 만드는 데 사용합니다.
 

@@ -8,6 +8,7 @@ import { calendarEventColors, collectCalendarEvents, eventMarkerOnDate, eventsFo
 import './promotion-schedule.css';
 import './church-calendar.css';
 import { CommunityNewsContent } from './community-news-content';
+import { WorshipItemContent } from './worship-item-content';
 import { ReadingSettings } from './reading-settings';
 import { BulletinBody, CompactDisclosure, useCompactBulletin } from './compact-disclosure';
 
@@ -68,7 +69,7 @@ export function BulletinContent({ data, offline = false, preview = false }: { da
     <BulletinBody>
       <div className="bulletin-overview">
         <section id="worship" className="content-section worship-section"><SectionHeading number="01" kicker="ORDER OF WORSHIP" title="예배 순서" icon={<CalendarDays size={23} />} />
-          <div className="worship-list">{bulletin.worshipItems.map((item, index) => <div className="worship-row" key={`${index}-${item.label}`}><span className="worship-index">{String(index + 1).padStart(2, '0')}</span><span className="worship-label">{item.label}{item.content && <small className="worship-content">{item.content}</small>}</span><span className="worship-assignee">{item.assignee}</span></div>)}</div>
+          <div className="worship-list">{bulletin.worshipItems.map((item, index) => <div className="worship-row" key={`${index}-${item.label}`}><span className="worship-index">{String(index + 1).padStart(2, '0')}</span><span className="worship-label">{item.label}<WorshipItemContent item={item} /></span><span className="worship-assignee">{item.assignee}</span></div>)}</div>
         </section>
         <section id="message" className="content-section message-section"><SectionHeading number="02" kicker="THE MESSAGE" title="오늘의 말씀" icon={<BookOpen size={23} />} />
           <div className="sermon-card"><span className="sermon-mark">“</span><p className="sermon-scripture">{bulletin.scripture}</p><h3>{bulletin.sermonTitle}</h3><div className="sermon-preacher"><span className="small-rule" />{bulletin.preacher}</div></div>

@@ -1,8 +1,20 @@
 import type { Pool, PoolClient } from 'pg';
 import type { BulletinRow } from './types';
-import type { BulletinInput } from './validation';
+import type { BulletinInput, WorshipItem } from './validation';
 
 type Queryable = Pick<Pool, 'query'> | PoolClient;
+
+export type WorshipItemRow = {
+  type: 'text' | 'sermon'; label: string; content: string; assignee: string;
+  sermon: { sermonTitle?: string; scripture?: string } | null;
+};
+
+export function toWorshipItem(row: WorshipItemRow): WorshipItem {
+  const fields = { label: row.label, assignee: row.assignee };
+  return row.type === 'sermon'
+    ? { ...fields, type: 'sermon', content: { sermonTitle: row.sermon?.sermonTitle ?? '', scripture: row.sermon?.scripture ?? '' } }
+    : { ...fields, type: 'text', content: row.content || '' };
+}
 
 export async function transaction<T>(pool: Pool, run: (client: PoolClient) => Promise<T>): Promise<T> {
   const client = await pool.connect();
@@ -27,7 +39,7 @@ export async function getBulletin(db: Queryable, condition: string, value: strin
   if (!result.rows[0]) return null;
   const b = result.rows[0];
   const [items, community, promotions] = await Promise.all([
-    db.query<{ label: string; content: string; assignee: string }>('SELECT label, content, assignee FROM worship_items WHERE bulletin_id = $1 ORDER BY position', [b.id]),
+    db.query<WorshipItemRow>('SELECT type, label, content, sermon, assignee FROM worship_items WHERE bulletin_id = $1 ORDER BY position', [b.id]),
     db.query<{ category: string; content: string; details: Pick<BulletinInput['communityNews'][number], 'people' | 'wedding' | 'weddings'> }>('SELECT category, content, details FROM community_news WHERE bulletin_id = $1 ORDER BY position', [b.id]),
     db.query<{ title: string; body: string; details: BulletinInput['promotions'][number]['details']; url: string | null; link_label: string | null }>('SELECT title, body, details, url, link_label FROM promotions WHERE bulletin_id = $1 ORDER BY position', [b.id]),
   ]);
@@ -36,7 +48,7 @@ export async function getBulletin(db: Queryable, condition: string, value: strin
     cover: b.cover_object_key ? { objectKey: b.cover_object_key, altText: b.cover_alt_text } : null,
     sermonTitle: b.sermon_title, scripture: b.scripture, preacher: b.preacher,
     status: b.status, publishedAt: b.published_at,
-    worshipItems: items.rows, communityNews: community.rows.map(({ details, ...news }) => ({ ...news, ...details })),
+    worshipItems: items.rows.map(toWorshipItem), communityNews: community.rows.map(({ details, ...news }) => ({ ...news, ...details })),
     promotions: promotions.rows.map(({ link_label, ...p }) => ({ ...p, url: p.url ?? '', linkLabel: link_label ?? '' })),
   };
 }
@@ -77,10 +89,13 @@ export async function replaceBulletin(client: PoolClient, id: string, data: Bull
   await client.query('DELETE FROM promotions WHERE bulletin_id = $1', [id]);
   await client.query('DELETE FROM community_news WHERE bulletin_id = $1', [id]);
   if (data.worshipItems.length) await client.query(
-    `INSERT INTO worship_items (bulletin_id, position, label, content, assignee)
-     SELECT $1, ordinality - 1, item->>'label', item->>'content', item->>'assignee'
+    `INSERT INTO worship_items (bulletin_id, position, type, label, content, sermon, assignee)
+     SELECT $1, ordinality - 1, item->>'type', item->>'label', item->>'content', item->'sermon', item->>'assignee'
      FROM jsonb_array_elements($2::jsonb) WITH ORDINALITY AS x(item, ordinality)`,
-    [id, JSON.stringify(data.worshipItems)]
+    [id, JSON.stringify(data.worshipItems.map((item) => ({ ...item,
+      content: item.type === 'sermon' ? '' : item.content,
+      sermon: item.type === 'sermon' ? item.content : {},
+    })))]
   );
   if (data.communityNews.length) await client.query(
     `INSERT INTO community_news (bulletin_id, position, category, content, details)

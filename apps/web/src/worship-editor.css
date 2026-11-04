@@ -1,0 +1,10 @@
+.worship-item-editor{border:1px solid #e0e8ef;border-radius:4px;padding:14px}
+.worship-item-heading{display:grid;grid-template-columns:25px minmax(90px,.65fr) minmax(0,1fr);gap:10px;align-items:end}
+.worship-item-heading .row-index{padding-bottom:13px}
+.worship-item-editor .field{margin-bottom:12px;min-width:0}
+.worship-item-content{display:grid;gap:0 12px;grid-template-columns:repeat(2,minmax(0,1fr));padding-left:35px}
+.worship-item-editor.is-sermon .worship-item-content>.field:last-child{grid-column:1/-1}
+.worship-item-editor .row-actions{justify-content:flex-end}
+.worship-item-editor .row-actions button{min-width:36px;min-height:36px}
+.worship-add-actions{display:flex;gap:10px}
+@media(max-width:760px){.worship-item-heading{grid-template-columns:25px minmax(0,1fr)}.worship-item-heading>.field:last-child{grid-column:2}.worship-item-content{grid-template-columns:1fr}.worship-add-actions{flex-wrap:wrap}.worship-add-actions .add-button{flex:1;min-width:100px}}

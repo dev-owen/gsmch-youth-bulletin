@@ -28,8 +28,10 @@ CREATE TABLE IF NOT EXISTS worship_items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   bulletin_id uuid NOT NULL REFERENCES bulletins(id) ON DELETE CASCADE,
   position integer NOT NULL CHECK (position >= 0),
+  type text NOT NULL DEFAULT 'text' CHECK (type IN ('text', 'sermon')),
   label text NOT NULL,
   content text NOT NULL DEFAULT '',
+  sermon jsonb NOT NULL DEFAULT '{}'::jsonb,
   assignee text NOT NULL DEFAULT '',
   UNIQUE (bulletin_id, position)
 );
@@ -57,6 +59,15 @@ CREATE TABLE IF NOT EXISTS community_news (
 );
 
 ALTER TABLE worship_items ADD COLUMN IF NOT EXISTS content text NOT NULL DEFAULT '';
+ALTER TABLE worship_items ADD COLUMN IF NOT EXISTS type text NOT NULL DEFAULT 'text';
+ALTER TABLE worship_items ADD COLUMN IF NOT EXISTS sermon jsonb NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE worship_items DROP CONSTRAINT IF EXISTS worship_items_type_check;
+ALTER TABLE worship_items ADD CONSTRAINT worship_items_type_check CHECK (type IN ('text', 'sermon'));
+ALTER TABLE worship_items DROP CONSTRAINT IF EXISTS worship_items_sermon_check;
+ALTER TABLE worship_items ADD CONSTRAINT worship_items_sermon_check CHECK (
+  type <> 'sermon' OR (jsonb_typeof(sermon) = 'object' AND sermon ?& ARRAY['sermonTitle', 'scripture']
+    AND jsonb_typeof(sermon->'sermonTitle') = 'string' AND jsonb_typeof(sermon->'scripture') = 'string')
+);
 ALTER TABLE community_news ADD COLUMN IF NOT EXISTS details jsonb NOT NULL DEFAULT '{}'::jsonb;
 ALTER TABLE promotions ADD COLUMN IF NOT EXISTS details jsonb NOT NULL DEFAULT '[]'::jsonb;
 ALTER TABLE promotions ADD COLUMN IF NOT EXISTS link_label text NOT NULL DEFAULT '';

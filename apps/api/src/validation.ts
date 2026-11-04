@@ -81,6 +81,19 @@ export const communityNewsInput = z.object({
   return news;
 });
 
+const worshipFields = { label: required(120), assignee: bounded(100) };
+const sermonContentInput = z.object({ sermonTitle: bounded(200), scripture: bounded(200) });
+export const worshipItemInput = z.discriminatedUnion('type', [
+  z.object({ ...worshipFields, type: z.literal('text'), content: bounded(300).default('') }),
+  z.object({ ...worshipFields, type: z.literal('sermon'), content: sermonContentInput }),
+]);
+export type WorshipItem = z.infer<typeof worshipItemInput>;
+
+export function worshipItemsComplete(items: WorshipItem[]) {
+  return items.length > 0 && items.every((item) => item.label.trim() && item.assignee.trim() &&
+    (item.type !== 'sermon' || (item.content.sermonTitle.trim() && item.content.scripture.trim())));
+}
+
 export const bulletinInput = z.object({
   serviceDate: dateSchema,
   theme: bounded(160),
@@ -89,9 +102,22 @@ export const bulletinInput = z.object({
   sermonTitle: bounded(200),
   scripture: bounded(200),
   preacher: bounded(100),
-  worshipItems: z.array(z.object({ label: required(120), content: bounded(300).default(''), assignee: bounded(100) })).max(30),
+  worshipItems: z.array(z.union([worshipItemInput,
+    z.object({ ...worshipFields, type: z.undefined().optional(), content: bounded(300).default('') }),
+  ])).max(30),
   communityNews: z.array(communityNewsInput).max(30).default([]),
   promotions: z.array(z.object({ title: required(120), body: required(1000), details: z.array(promotionDetailInput).max(20).default([]), url: urlSchema, linkLabel: bounded(60).default('') })).max(10),
+}).transform((bulletin) => {
+  const worshipItems = bulletin.worshipItems.map((item): WorshipItem => {
+    if (item.type) return item;
+    if (item.label === '설교') return { ...item, type: 'sermon', assignee: item.assignee || bulletin.preacher,
+      content: { sermonTitle: bulletin.sermonTitle, scripture: bulletin.scripture } };
+    return { ...item, type: 'text' };
+  });
+  const sermon = worshipItems.find((item) => item.type === 'sermon');
+  return { ...bulletin, worshipItems, ...(sermon ? {
+    sermonTitle: sermon.content.sermonTitle, scripture: sermon.content.scripture, preacher: sermon.assignee,
+  } : {}) };
 });
 
 const directoryGroups = z.array(z.object({ title: required(120), entries: z.array(required(500)).max(100) })).max(20);

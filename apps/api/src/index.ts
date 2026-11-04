@@ -3,10 +3,10 @@ import { cors } from 'hono/cors';
 import { Pool } from 'pg';
 import { ZodError } from 'zod';
 import { createAuth } from './auth';
-import { getBulletin, getPromotionCalendarEvents, getSiteInfo, replaceBulletin, transaction } from './db';
+import { getBulletin, getPromotionCalendarEvents, getSiteInfo, replaceBulletin, toWorshipItem, transaction, type WorshipItemRow } from './db';
 import { readImage } from './media';
 import type { AppEnv } from './types';
-import { bulletinInput, dateSchema, siteInfoInput } from './validation';
+import { bulletinInput, dateSchema, siteInfoInput, worshipItemsComplete } from './validation';
 
 const app = new Hono<AppEnv>();
 const noStore = { 'Cache-Control': 'no-store' };
@@ -101,8 +101,9 @@ app.post('/v1/admin/bulletins', async (c) => {
   const id = await transaction(c.get('pool'), async (client) => {
     const inserted = await client.query<{ id: string }>('INSERT INTO bulletins (service_date) VALUES ($1) RETURNING id', [parsed.data]);
     const nextId = inserted.rows[0].id;
-    await client.query(`INSERT INTO worship_items (bulletin_id, position, label, assignee)
-      SELECT $1, position, label, '' FROM worship_items
+    await client.query(`INSERT INTO worship_items (bulletin_id, position, type, label, sermon, assignee)
+      SELECT $1, position, type, label,
+        CASE WHEN type = 'sermon' THEN '{"sermonTitle":"","scripture":""}'::jsonb ELSE '{}'::jsonb END, '' FROM worship_items
       WHERE bulletin_id = (SELECT id FROM bulletins WHERE status = 'published' AND service_date < $2 ORDER BY service_date DESC LIMIT 1) ORDER BY position`, [nextId, parsed.data]);
     return nextId;
   });
@@ -117,7 +118,7 @@ app.put('/v1/admin/bulletins/:id', async (c) => {
     if (!row.rowCount) return false;
     if (row.rows[0].status === 'published' && row.rows[0].service_date !== input.serviceDate) throw new InputError('발행된 주보의 날짜는 바꿀 수 없습니다.');
     if (row.rows[0].status === 'published' && (!input.theme || !input.sermonTitle || !input.scripture || !input.preacher ||
-      !input.worshipItems.length || input.worshipItems.some((item) => !item.assignee))) throw new InputError(publicationError);
+      !worshipItemsComplete(input.worshipItems))) throw new InputError(publicationError);
     if (input.coverMediaId) {
       const media = await client.query('SELECT id FROM media_assets WHERE id = $1', [input.coverMediaId]);
       if (!media.rowCount) throw new InputError('대표 이미지를 찾을 수 없습니다.');
@@ -141,9 +142,9 @@ app.post('/v1/admin/bulletins/:id/publish', async (c) => {
     if (!row.rows[0]) return 'missing';
     const b = row.rows[0];
     if (b.status === 'published') return settings.rows[0]?.current_bulletin_id === id ? 'published' : 'already-published';
-    const items = await client.query<{ label: string; assignee: string }>('SELECT label, assignee FROM worship_items WHERE bulletin_id = $1', [id]);
+    const items = await client.query<WorshipItemRow>('SELECT type, label, content, sermon, assignee FROM worship_items WHERE bulletin_id = $1', [id]);
     if (!dateSchema.safeParse(b.service_date).success || !b.theme.trim() || !b.sermon_title.trim() || !b.scripture.trim() || !b.preacher.trim() ||
-      !items.rows.length || items.rows.some((item) => !item.label.trim() || !item.assignee.trim())) return 'incomplete';
+      !worshipItemsComplete(items.rows.map(toWorshipItem))) return 'incomplete';
     await client.query("UPDATE bulletins SET status = 'published', published_at = COALESCE(published_at, now()), updated_at = now() WHERE id = $1", [id]);
     await client.query('UPDATE site_settings SET current_bulletin_id = $1 WHERE id = 1', [id]);
     return 'published';

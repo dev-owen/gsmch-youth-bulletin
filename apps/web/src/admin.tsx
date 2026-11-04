@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, CalendarDays, Check, ChevronRight, Eye, ImagePlus, LogOut, Plus, Save, Settings2, Trash2, UploadCloud, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarDays, Check, ChevronRight, Eye, ImagePlus, LogOut, Plus, Save, Settings2, Trash2, UploadCloud, X } from 'lucide-react';
 import { api, authClient, coverUrl, json, shortDate, showToast, type Bulletin, type BulletinInput, type BulletinListItem, type CalendarEvent, type ChurchEvent, type SiteInfo } from './lib';
 import { BulletinContent } from './public';
 import { normalizeSiteInfo } from './church-info';
@@ -8,6 +8,8 @@ import { RecurringInfoEditor } from './church-info-editor';
 import { optimizeImage } from './media';
 import { PromotionEditor } from './promotion-editor';
 import { CommunityNewsEditor } from './community-news-editor';
+import { WorshipEditor } from './worship-editor';
+import { normalizeWorshipItems, syncSermonFields } from './worship';
 import './editor-actions.css';
 
 type AdminStatus = 'checking' | 'ready' | 'login' | 'forbidden' | 'error';
@@ -60,7 +62,7 @@ function BulletinIndex() {
     finally { setBusy(false); }
   }
   return <div className="admin-page"><div className="admin-page-heading"><div><span className="eyebrow dark">WEEKLY BULLETINS</span><h1>주보 목록</h1><p>새 주보를 작성하고 발행 상태를 확인하세요.</p></div><button className="primary-button" onClick={() => setCreating(true)}><Plus size={18} /> 새 주보 만들기</button></div>
-    {creating && <div className="create-panel"><div><strong>새 주보 만들기</strong><p>마지막 주보의 예배 순서 이름만 가져옵니다.</p></div><div className="create-controls"><input aria-label="예배 날짜" type="date" value={date} onChange={(e) => setDate(e.target.value)} /><button className="primary-button" disabled={busy} onClick={create}>{busy ? '만드는 중…' : '만들기'}</button><button className="icon-button" aria-label="닫기" onClick={() => setCreating(false)}><X size={20} /></button></div></div>}
+    {creating && <div className="create-panel"><div><strong>새 주보 만들기</strong><p>마지막 주보의 예배 순서 이름과 타입을 가져옵니다.</p></div><div className="create-controls"><input aria-label="예배 날짜" type="date" value={date} onChange={(e) => setDate(e.target.value)} /><button className="primary-button" disabled={busy} onClick={create}>{busy ? '만드는 중…' : '만들기'}</button><button className="icon-button" aria-label="닫기" onClick={() => setCreating(false)}><X size={20} /></button></div></div>}
     <ErrorNote text={error} />
     <div className="admin-list">{items.map((item) => <Link to={`/admin/bulletins/${item.id}`} className="admin-list-row" key={item.id}><span className="admin-date-icon"><CalendarDays size={20} /></span><span className="admin-list-content"><small>{shortDate(item.serviceDate)}</small><strong>{item.theme || '제목을 입력해 주세요'}</strong></span><span className={`status-chip ${item.status}`}>{item.status === 'published' ? '발행됨' : '초안'}</span><ChevronRight size={19} /></Link>)}
       {items.length === 0 && !error && <div className="admin-empty"><CalendarDays size={28} /><h2>아직 주보가 없습니다</h2><p>첫 주보를 만들어 예배 내용을 채워 주세요.</p></div>}</div>
@@ -90,10 +92,7 @@ function BulletinEditor({ id }: { id: string }) {
       setBulletin(b.bulletin); setSiteInfo(s.siteInfo); setCalendarEvents(b.calendarEvents || []); formRef.current = input; setForm(input);
     }).catch((e) => setError(e.message));
   }, [id]);
-  function update(change: Partial<BulletinInput>) { setForm((value) => { if (!value) return null; const next = { ...value, ...change }; formRef.current = next; return next; }); setDirty(true); setNotice(''); }
-  function itemChange(index: number, key: 'label' | 'content' | 'assignee', value: string) {
-    if (!form) return; const copy = [...form.worshipItems]; copy[index] = { ...copy[index], [key]: value }; update({ worshipItems: copy });
-  }
+  function update(change: Partial<BulletinInput>) { setForm((value) => { if (!value) return null; const next = syncSermonFields({ ...value, ...change }); formRef.current = next; return next; }); setDirty(true); setNotice(''); }
   async function save(automatic = false) {
     const snapshot = formRef.current;
     if (!snapshot) return false;
@@ -145,8 +144,8 @@ function BulletinEditor({ id }: { id: string }) {
       <div className="upload-actions"><label className="secondary-button upload-button"><UploadCloud size={17} /> {uploading ? '압축 및 업로드 중…' : '이미지 선택'}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy || uploading} onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ''; }} /></label>{form.coverMediaId && <button className="text-button" disabled={busy || uploading} onClick={() => { update({ coverMediaId: null, coverAltText: '' }); setBulletin((b) => b ? { ...b, cover: null } : b); }}>이미지 제거</button>}</div>
       {form.coverMediaId && bulletin.cover && <img className="editor-cover-thumb" src={coverUrl(bulletin) || ''} alt={bulletin.cover.altText} />}
     </section>
-    <section className="editor-card"><div className="editor-card-head"><span className="editor-card-number">02</span><div><h2>예배 순서</h2><p>순서명, 내용, 담당자를 입력해 주세요.</p></div></div><div className="editable-list">{form.worshipItems.map((item, index) => <div className="editable-row worship-editor-row" key={index}><span className="row-index">{String(index + 1).padStart(2, '0')}</span><input aria-label={`${index + 1}번째 순서명`} value={item.label} onChange={(e) => itemChange(index, 'label', e.target.value)} placeholder="순서명" /><input aria-label={`${index + 1}번째 내용`} value={item.content} onChange={(e) => itemChange(index, 'content', e.target.value)} placeholder="내용 (선택)" /><input aria-label={`${index + 1}번째 담당자`} value={item.assignee} onChange={(e) => itemChange(index, 'assignee', e.target.value)} placeholder="담당자" /><div className="row-actions"><button aria-label="위로" disabled={index === 0} onClick={() => update({ worshipItems: move(form.worshipItems, index, index - 1) })}><ArrowUp size={15} /></button><button aria-label="아래로" disabled={index === form.worshipItems.length - 1} onClick={() => update({ worshipItems: move(form.worshipItems, index, index + 1) })}><ArrowDown size={15} /></button><button aria-label="삭제" onClick={() => update({ worshipItems: form.worshipItems.filter((_, i) => i !== index) })}><Trash2 size={15} /></button></div></div>)}</div><button className="add-button" disabled={form.worshipItems.length >= 30} onClick={() => update({ worshipItems: [...form.worshipItems, { label: '', content: '', assignee: '' }] })}><Plus size={16} /> 순서 추가</button></section>
-    <section className="editor-card"><div className="editor-card-head"><span className="editor-card-number">03</span><div><h2>설교</h2><p>오늘의 말씀을 소개합니다.</p></div></div><label className="field">설교 제목<input value={form.sermonTitle} onChange={(e) => update({ sermonTitle: e.target.value })} placeholder="설교 제목" /></label><div className="field-grid"><label className="field">성경 본문<input value={form.scripture} onChange={(e) => update({ scripture: e.target.value })} placeholder="예: 요한복음 15:1–8" /></label><label className="field">설교자<input value={form.preacher} onChange={(e) => update({ preacher: e.target.value })} placeholder="설교자 이름" /></label></div></section>
+    <WorshipEditor value={form.worshipItems} sermon={{ sermonTitle: form.sermonTitle, scripture: form.scripture }} preacher={form.preacher} onChange={(worshipItems) => update({ worshipItems })} />
+    {!form.worshipItems.some((item) => item.type === 'sermon') && <section className="editor-card"><div className="editor-card-head"><span className="editor-card-number">03</span><div><h2>설교</h2><p>오늘의 말씀을 소개합니다.</p></div></div><label className="field">설교 주제<input value={form.sermonTitle} maxLength={200} onChange={(e) => update({ sermonTitle: e.target.value })} placeholder="설교 주제" /></label><div className="field-grid"><label className="field">말씀 구절<input value={form.scripture} maxLength={200} onChange={(e) => update({ scripture: e.target.value })} placeholder="예: 요한복음 15:1–8" /></label><label className="field">설교자<input value={form.preacher} maxLength={100} onChange={(e) => update({ preacher: e.target.value })} placeholder="설교자 이름" /></label></div></section>}
     <CommunityNewsEditor value={form.communityNews} onChange={(communityNews) => update({ communityNews })} />
     <PromotionEditor value={form.promotions} serviceDate={form.serviceDate} onChange={(promotions) => update({ promotions })} />
     </div><aside className="editor-guide"><div className="editor-actions" role="group" aria-label="주보 편집 작업"><button className="secondary-button" onClick={() => setPreview(true)}><Eye size={17} /> 모바일 미리보기</button><button className="secondary-button" disabled={busy || uploading} onClick={() => void save()}><Save size={17} /> {busy ? '처리 중…' : '저장'}</button>{bulletin.status === 'draft' && <button className="primary-button" disabled={busy || dirty || uploading} onClick={publish}><Check size={17} /> 발행</button>}</div><div className="guide-card"><span className="eyebrow dark">PUBLISHING GUIDE</span><h3>발행 전 확인</h3><ul><li>예배 날짜와 주제를 입력했나요?</li><li>모든 예배 순서에 담당자가 있나요?</li><li>설교 정보가 정확한가요?</li><li>광고 링크가 있다면 열리나요?</li></ul><p>저장만 하면 공개 주보는 바뀌지 않습니다. 발행 버튼을 누르면 같은 QR 주소에 새 주보가 표시됩니다.</p></div></aside></div>
@@ -154,8 +153,7 @@ function BulletinEditor({ id }: { id: string }) {
   </div>;
 }
 
-function toInput(b: Bulletin): BulletinInput { return { serviceDate: b.serviceDate, theme: b.theme, coverMediaId: b.coverMediaId, coverAltText: b.cover?.altText || '', sermonTitle: b.sermonTitle, scripture: b.scripture, preacher: b.preacher, worshipItems: b.worshipItems.map((item) => ({ ...item, content: item.content || '' })), communityNews: b.communityNews || [], promotions: b.promotions.map((promo) => ({ ...promo, details: promo.details || [] })) }; }
-function move<T>(array: T[], from: number, to: number): T[] { const result = [...array]; const [item] = result.splice(from, 1); result.splice(to, 0, item); return result; }
+function toInput(b: Bulletin): BulletinInput { return syncSermonFields({ serviceDate: b.serviceDate, theme: b.theme, coverMediaId: b.coverMediaId, coverAltText: b.cover?.altText || '', sermonTitle: b.sermonTitle, scripture: b.scripture, preacher: b.preacher, worshipItems: normalizeWorshipItems(b.worshipItems, b), communityNews: b.communityNews || [], promotions: b.promotions.map((promo) => ({ ...promo, details: promo.details || [] })) }); }
 
 function SiteInfoEditor() {
   const [form, setForm] = useState<SiteInfo | null>(null);

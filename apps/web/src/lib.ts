@@ -10,7 +10,10 @@ export type SiteInfo = {
   vision: string; address: string; mapUrl: string; recurringInfo?: Partial<RecurringInfo>; churchEvents: ChurchEvent[];
 };
 export type ChurchEvent = { title: string; date: string; endDate?: string; content: string; contact: string };
-export type WorshipItem = { label: string; content: string; assignee: string };
+export type SermonContent = { sermonTitle: string; scripture: string };
+export type WorshipItem = { label: string; assignee: string } & (
+  { type: 'text'; content: string } | { type: 'sermon'; content: SermonContent }
+);
 export type CommunityPerson = { name: string; peer: string };
 export type CommunityWedding = { groom: CommunityPerson; bride: CommunityPerson; dateTime: string; location: string };
 export type CommunityNews = {
