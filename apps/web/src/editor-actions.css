@@ -5,6 +5,7 @@
 
 .bulletin-editor-page .editor-actions {
   display: grid;
+  justify-content: stretch;
   gap: 10px;
   margin: 0;
   padding: 16px;
@@ -16,6 +17,7 @@
 
 .bulletin-editor-page .editor-actions button {
   width: 100%;
+  min-width: 0;
   min-height: 44px;
   white-space: normal;
 }
