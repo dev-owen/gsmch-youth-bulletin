@@ -42,13 +42,13 @@ export async function getBulletin(db: Queryable, condition: string, value: strin
 }
 
 export async function getSiteInfo(db: Queryable) {
-  const result = await db.query<{ church_name: string; worship_time: string; gathering_time: string; introduction: string; vision: string; address: string; map_url: string; recurring_info: unknown }>(
-    'SELECT church_name, worship_time, gathering_time, introduction, vision, address, map_url, recurring_info FROM site_info WHERE id = 1'
+  const result = await db.query<{ church_name: string; worship_time: string; gathering_time: string; introduction: string; vision: string; address: string; map_url: string; recurring_info: unknown; church_events: unknown }>(
+    'SELECT church_name, worship_time, gathering_time, introduction, vision, address, map_url, recurring_info, church_events FROM site_info WHERE id = 1'
   );
   const row = result.rows[0];
   if (!row) throw new Error('site_info row is missing');
   return { churchName: row.church_name, worshipTime: row.worship_time, gatheringTime: row.gathering_time,
-    introduction: row.introduction, vision: row.vision, address: row.address, mapUrl: row.map_url, recurringInfo: row.recurring_info };
+    introduction: row.introduction, vision: row.vision, address: row.address, mapUrl: row.map_url, recurringInfo: row.recurring_info, churchEvents: row.church_events };
 }
 
 export async function replaceBulletin(client: PoolClient, id: string, data: BulletinInput) {

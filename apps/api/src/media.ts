@@ -1,4 +1,7 @@
 const validTypes = ['image/jpeg', 'image/png', 'image/webp'] as const;
+// Keep these upload limits in sync with apps/web/src/media.ts.
+export const MAX_IMAGE_BYTES = 512 * 1024;
+export const MAX_IMAGE_DIMENSION = 1920;
 
 function dimensions(bytes: Uint8Array, type: string): [number, number] | null {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -33,13 +36,13 @@ function dimensions(bytes: Uint8Array, type: string): [number, number] | null {
 }
 
 export async function readImage(file: File) {
-  if (!validTypes.includes(file.type as typeof validTypes[number]) || file.size === 0 || file.size > 5 * 1024 * 1024) {
-    throw new Error('JPG, PNG, WebP 이미지만 5MB 이하로 올릴 수 있습니다.');
+  if (!validTypes.includes(file.type as typeof validTypes[number]) || file.size === 0 || file.size > MAX_IMAGE_BYTES) {
+    throw new Error('JPG, PNG, WebP 이미지만 512KB 이하로 올릴 수 있습니다. 관리자 화면에서 이미지를 다시 선택해 주세요.');
   }
   const bytes = new Uint8Array(await file.arrayBuffer());
   const size = dimensions(bytes, file.type);
-  if (!size || size[0] < 1 || size[1] < 1 || size[0] > 2400 || size[1] > 4000) {
-    throw new Error('이미지 형식이 올바르지 않거나 크기 제한(2400 × 4000px)을 넘었습니다.');
+  if (!size || size[0] < 1 || size[1] < 1 || size[0] > MAX_IMAGE_DIMENSION || size[1] > MAX_IMAGE_DIMENSION) {
+    throw new Error('이미지 형식이 올바르지 않거나 긴 변이 1,920px를 넘었습니다. 관리자 화면에서 이미지를 다시 선택해 주세요.');
   }
   return bytes;
 }

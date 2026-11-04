@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, CalendarDays, Check, ChevronRight, Eye, ImagePlus, LogOut, Plus, Save, Settings2, Trash2, UploadCloud, X } from 'lucide-react';
-import { api, authClient, coverUrl, json, shortDate, type Bulletin, type BulletinInput, type BulletinListItem, type SiteInfo } from './lib';
+import { api, authClient, coverUrl, json, shortDate, type Bulletin, type BulletinInput, type BulletinListItem, type ChurchEvent, type SiteInfo } from './lib';
 import { BulletinContent } from './public';
 import { normalizeSiteInfo } from './church-info';
 import { RecurringInfoEditor } from './church-info-editor';
+import { optimizeImage } from './media';
 
 type AdminStatus = 'checking' | 'ready' | 'login' | 'forbidden' | 'error';
 function ErrorNote({ text }: { text: string }) { return text ? <div className="form-error" role="alert">{text}</div> : null; }
@@ -101,22 +102,25 @@ function BulletinEditor({ id }: { id: string }) {
   }
   async function upload(file: File) {
     if (!form?.coverAltText.trim()) { setError('이미지 대체 텍스트를 입력해 주세요.'); return; }
-    setUploading(true); setError('');
-    try { const body = new FormData(); body.append('file', file); body.append('altText', form.coverAltText.trim());
+    setUploading(true); setError(''); setNotice('');
+    try {
+      const optimized = await optimizeImage(file);
+      const body = new FormData(); body.append('file', optimized); body.append('altText', form.coverAltText.trim());
       const result = await api<{ id: string; url: string }>('/v1/admin/media', { method: 'POST', body });
       update({ coverMediaId: result.id }); setBulletin((b) => b ? { ...b, cover: { objectKey: result.url.split('/').at(-1)!, altText: form.coverAltText.trim() } } : b);
+      setNotice(`이미지를 최적화해 업로드했습니다. ${Math.ceil(file.size / 1024).toLocaleString()}KB → ${Math.ceil(optimized.size / 1024).toLocaleString()}KB · 변경 내용을 저장해 주세요.`);
     } catch (e) { setError(e instanceof Error ? e.message : '이미지를 올리지 못했습니다.'); }
     finally { setUploading(false); }
   }
   if (!form || !bulletin || !siteInfo) return <div className="admin-page"><Link to="/admin" className="back-link"><ArrowLeft size={16} /> 주보 목록</Link><div className="admin-empty">{error || '주보를 불러오는 중입니다.'}</div></div>;
   const previewBulletin: Bulletin = { ...bulletin, ...form, cover: form.coverMediaId && bulletin.cover ? { ...bulletin.cover, altText: form.coverAltText } : null };
   return <div className="admin-page"><div className="editor-heading"><Link to="/admin" className="back-link"><ArrowLeft size={16} /> 주보 목록</Link><div className="admin-page-heading"><div><span className="eyebrow dark">BULLETIN EDITOR</span><h1>{bulletin.status === 'published' ? '주보 수정' : '주보 작성'}</h1><p>내용을 저장한 뒤 모바일 미리보기에서 확인하고 발행하세요.</p></div><span className={`status-chip ${bulletin.status}`}>{bulletin.status === 'published' ? '발행됨' : '초안'}</span></div></div>
-    <div className="editor-actions"><button className="secondary-button" onClick={() => setPreview(true)}><Eye size={17} /> 모바일 미리보기</button><button className="secondary-button" disabled={busy} onClick={save}><Save size={17} /> {busy ? '처리 중…' : '저장'}</button>{bulletin.status === 'draft' && <button className="primary-button" disabled={busy || dirty} onClick={publish}><Check size={17} /> 발행</button>}</div>
+    <div className="editor-actions"><button className="secondary-button" onClick={() => setPreview(true)}><Eye size={17} /> 모바일 미리보기</button><button className="secondary-button" disabled={busy || uploading} onClick={save}><Save size={17} /> {busy ? '처리 중…' : '저장'}</button>{bulletin.status === 'draft' && <button className="primary-button" disabled={busy || dirty || uploading} onClick={publish}><Check size={17} /> 발행</button>}</div>
     <ErrorNote text={error} />{notice && <div className="form-notice" role="status">{notice}</div>}
     <div className="editor-grid"><div className="editor-column"><section className="editor-card"><div className="editor-card-head"><span className="editor-card-number">01</span><div><h2>표지</h2><p>이번 주 예배의 첫 화면입니다.</p></div></div><div className="field-grid"><label className="field">예배 날짜<input type="date" value={form.serviceDate} disabled={bulletin.status === 'published'} onChange={(e) => update({ serviceDate: e.target.value })} /></label><label className="field">이번 주 주제<input value={form.theme} maxLength={160} onChange={(e) => update({ theme: e.target.value })} placeholder="예: 함께 걷는 믿음" /></label></div>
-      <div className="upload-box"><ImagePlus size={22} /><div><strong>대표 이미지</strong><p>선택 사항 · JPG, PNG, WebP · 5MB 이하 · 최대 2400px 너비</p></div></div>
+      <div className="upload-box"><ImagePlus size={22} /><div><strong>대표 이미지</strong><p>선택 사항 · JPG, PNG, WebP · 원본 20MB 이하 · 긴 변 최대 1,920px, 512KB 이하로 자동 압축</p></div></div>
       <label className="field">이미지 대체 텍스트<input value={form.coverAltText} onChange={(e) => update({ coverAltText: e.target.value })} maxLength={200} placeholder="이미지에 보이는 내용을 설명해 주세요" /></label>
-      <div className="upload-actions"><label className="secondary-button upload-button"><UploadCloud size={17} /> {uploading ? '업로드 중…' : '이미지 선택'}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ''; }} /></label>{form.coverMediaId && <button className="text-button" onClick={() => { update({ coverMediaId: null, coverAltText: '' }); setBulletin((b) => b ? { ...b, cover: null } : b); }}>이미지 제거</button>}</div>
+      <div className="upload-actions"><label className="secondary-button upload-button"><UploadCloud size={17} /> {uploading ? '압축 및 업로드 중…' : '이미지 선택'}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy || uploading} onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ''; }} /></label>{form.coverMediaId && <button className="text-button" disabled={busy || uploading} onClick={() => { update({ coverMediaId: null, coverAltText: '' }); setBulletin((b) => b ? { ...b, cover: null } : b); }}>이미지 제거</button>}</div>
       {form.coverMediaId && bulletin.cover && <img className="editor-cover-thumb" src={coverUrl(bulletin) || ''} alt={bulletin.cover.altText} />}
     </section>
     <section className="editor-card"><div className="editor-card-head"><span className="editor-card-number">02</span><div><h2>예배 순서</h2><p>순서명, 내용, 담당자를 입력해 주세요.</p></div></div><div className="editable-list">{form.worshipItems.map((item, index) => <div className="editable-row worship-editor-row" key={index}><span className="row-index">{String(index + 1).padStart(2, '0')}</span><input aria-label={`${index + 1}번째 순서명`} value={item.label} onChange={(e) => itemChange(index, 'label', e.target.value)} placeholder="순서명" /><input aria-label={`${index + 1}번째 내용`} value={item.content} onChange={(e) => itemChange(index, 'content', e.target.value)} placeholder="내용 (선택)" /><input aria-label={`${index + 1}번째 담당자`} value={item.assignee} onChange={(e) => itemChange(index, 'assignee', e.target.value)} placeholder="담당자" /><div className="row-actions"><button aria-label="위로" disabled={index === 0} onClick={() => update({ worshipItems: move(form.worshipItems, index, index - 1) })}><ArrowUp size={15} /></button><button aria-label="아래로" disabled={index === form.worshipItems.length - 1} onClick={() => update({ worshipItems: move(form.worshipItems, index, index + 1) })}><ArrowDown size={15} /></button><button aria-label="삭제" onClick={() => update({ worshipItems: form.worshipItems.filter((_, i) => i !== index) })}><Trash2 size={15} /></button></div></div>)}</div><button className="add-button" disabled={form.worshipItems.length >= 30} onClick={() => update({ worshipItems: [...form.worshipItems, { label: '', content: '', assignee: '' }] })}><Plus size={16} /> 순서 추가</button></section>
@@ -138,13 +142,16 @@ function SiteInfoEditor() {
   const [notice, setNotice] = useState('');
   useEffect(() => { api<{ siteInfo: SiteInfo }>('/v1/admin/site-info').then((r) => setForm(normalizeSiteInfo(r.siteInfo))).catch((e) => setError(e.message)); }, []);
   function update(key: keyof SiteInfo, value: string) { setForm((f) => f ? { ...f, [key]: value } : f); setNotice(''); }
+  function updateEvent(index: number, key: keyof ChurchEvent, value: string) {
+    setForm((current) => current ? { ...current, churchEvents: current.churchEvents.map((event, i) => i === index ? { ...event, [key]: value } : event) } : current); setNotice('');
+  }
   async function save() {
     if (!form) return;
     setBusy(true); setError(''); setNotice('');
     try {
       const normalized = normalizeSiteInfo(form);
       const cleanGroups = (groups: typeof normalized.recurringInfo.missionGroups) => groups.map((group) => ({ ...group, entries: group.entries.map((entry) => entry.trim()).filter(Boolean) }));
-      const input = { ...normalized, recurringInfo: { ...normalized.recurringInfo, missionGroups: cleanGroups(normalized.recurringInfo.missionGroups), staffGroups: cleanGroups(normalized.recurringInfo.staffGroups) } };
+      const input = { ...normalized, recurringInfo: { ...normalized.recurringInfo, missionGroups: cleanGroups(normalized.recurringInfo.missionGroups), staffGroups: cleanGroups(normalized.recurringInfo.staffGroups) }, churchEvents: (normalized.churchEvents || []).filter((event) => event.title.trim() && event.date).map((event) => ({ ...event, title: event.title.trim(), content: event.content.trim(), contact: event.contact.trim() })).sort((a, b) => a.date.localeCompare(b.date)) };
       const result = await api<{ siteInfo: SiteInfo }>('/v1/admin/site-info', json(input));
       setForm(normalizeSiteInfo(result.siteInfo)); setNotice('교회 안내를 저장했습니다. 모든 주보에 반영됩니다.');
     }
@@ -161,6 +168,9 @@ function SiteInfoEditor() {
       <label className="field">비전<textarea rows={5} value={form.vision} onChange={(e) => update('vision', e.target.value)} placeholder="교회의 비전을 적어 주세요" /></label>
       <label className="field">주소<input value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="실제 주소를 입력해 주세요" /></label>
       <label className="field">지도 링크<input type="url" value={form.mapUrl} onChange={(e) => update('mapUrl', e.target.value)} placeholder="https://" /></label>
-    </section><RecurringInfoEditor value={normalizeSiteInfo(form).recurringInfo} onChange={(recurringInfo) => { setForm((current) => current ? { ...current, recurringInfo } : current); setNotice(''); }} /></div><aside className="guide-card"><span className="eyebrow dark">NOTE</span><h3>안내 내용 관리</h3><p>사진에서 옮긴 모임·헌금·비전·선교·섬기는 분들 안내가 기본으로 제공됩니다. 저장하면 이번 주와 지난 주보 모두에 최신 안내가 표시됩니다. 월별 모임 일정과 담당자가 바뀌면 이곳에서 수정해 주세요.</p><button className="primary-button full site-info-save" disabled={busy} onClick={save}><Save size={17} /> {busy ? '저장 중…' : '전체 안내 저장'}</button><Link className="text-link" to="/">공개 화면 확인 <ArrowRight size={16} /></Link></aside></div>
+    </section><section className="editor-card"><div className="editor-card-head"><span className="editor-card-number"><CalendarDays size={18} /></span><div><h2>교회 주요 일정</h2><p>제목과 날짜는 필수입니다. 일정은 주보 캘린더에 표시됩니다.</p></div></div>
+      <div className="event-editor-list">{(form.churchEvents || []).map((event, index) => <div className="event-editor" key={index}><div className="promo-editor-head"><strong>일정 {String(index + 1).padStart(2, '0')}</strong><button className="text-button" onClick={() => { setForm((current) => current ? { ...current, churchEvents: current.churchEvents.filter((_, i) => i !== index) } : current); setNotice(''); }}>삭제</button></div><div className="field-grid"><label className="field">제목<input value={event.title} onChange={(e) => updateEvent(index, 'title', e.target.value)} placeholder="예: 청년부 수련회" /></label><label className="field">일자<input type="date" value={event.date} onChange={(e) => updateEvent(index, 'date', e.target.value)} /></label></div><label className="field">내용 (선택)<textarea rows={2} value={event.content} onChange={(e) => updateEvent(index, 'content', e.target.value)} placeholder="장소나 안내 내용을 적어 주세요" /></label><label className="field">연락처 (선택)<input value={event.contact} onChange={(e) => updateEvent(index, 'contact', e.target.value)} placeholder="전화번호 또는 담당자" /></label></div>)}</div>
+      <button className="add-button" disabled={(form.churchEvents || []).length >= 100} onClick={() => { setForm((current) => current ? { ...current, churchEvents: [...(current.churchEvents || []), { title: '', date: '', content: '', contact: '' }] } : current); setNotice(''); }}><Plus size={16} /> 일정 추가</button>
+    </section><RecurringInfoEditor value={normalizeSiteInfo(form).recurringInfo} onChange={(recurringInfo) => { setForm((current) => current ? { ...current, recurringInfo } : current); setNotice(''); }} /></div><aside className="guide-card"><span className="eyebrow dark">NOTE</span><h3>안내 내용 관리</h3><p>교회 정보와 주요 일정은 저장하면 이번 주와 지난 주보 모두에 반영됩니다. 일정은 날짜별 캘린더와 월별 목록으로 보여집니다.</p><button className="primary-button full site-info-save" disabled={busy} onClick={save}><Save size={17} /> {busy ? '저장 중…' : '전체 안내 저장'}</button><Link className="text-link" to="/">공개 화면 확인 <ArrowRight size={16} /></Link></aside></div>
   </div>;
 }

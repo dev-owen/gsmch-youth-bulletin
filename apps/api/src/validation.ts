@@ -48,6 +48,7 @@ export const siteInfoInput = z.object({
   address: bounded(500),
   mapUrl: urlSchema,
   recurringInfo: recurringInfoInput.optional(),
+  churchEvents: z.array(z.object({ title: required(120), date: dateSchema, content: bounded(1000).default(''), contact: bounded(200).default('') })).max(100).optional(),
 });
 
 export type BulletinInput = z.infer<typeof bulletinInput>;

@@ -69,10 +69,12 @@ CREATE TABLE IF NOT EXISTS site_info (
   address text NOT NULL DEFAULT '',
   map_url text NOT NULL DEFAULT '',
   recurring_info jsonb NOT NULL DEFAULT '{}'::jsonb,
+  church_events jsonb NOT NULL DEFAULT '[]'::jsonb,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 ALTER TABLE site_info ADD COLUMN IF NOT EXISTS recurring_info jsonb NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE site_info ADD COLUMN IF NOT EXISTS church_events jsonb NOT NULL DEFAULT '[]'::jsonb;
 
 CREATE TABLE IF NOT EXISTS site_settings (
   id integer PRIMARY KEY DEFAULT 1 CHECK (id = 1),

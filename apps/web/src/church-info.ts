@@ -63,6 +63,7 @@ export function normalizeSiteInfo(info: SiteInfo): SiteInfo & { recurringInfo: R
   const saved = info.recurringInfo;
   return {
     ...info,
+    churchEvents: info.churchEvents || [],
     introduction: info.introduction || '젊은이교회는 예수님이 이끄심에 따라 젊은이들이 의사결정과 재정운영을 하는 기독교대한감리회 선한목자교회 내의 독립교회입니다.',
     vision: info.vision || '젊은이교회는 하나님의 기쁘신 뜻을 세상 가운데 행하는 교회입니다.',
     recurringInfo: {

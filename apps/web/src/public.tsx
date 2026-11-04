@@ -32,7 +32,7 @@ function SectionHeading({ number, kicker, title, icon }: { number: string; kicke
 }
 
 function ReadingTools({ hasNews, hasAnnouncements }: { hasNews: boolean; hasAnnouncements: boolean }) {
-  const links = [['worship', '예배 순서'], ['message', '오늘의 말씀'], ...(hasNews ? [['news', '교우 소식']] : []), ...(hasAnnouncements ? [['announcements', '광고']] : []), ['about', '교회 안내']];
+  const links = [['worship', '예배 순서'], ['message', '오늘의 말씀'], ...(hasNews ? [['news', '교우 소식']] : []), ...(hasAnnouncements ? [['announcements', '광고']] : []), ['calendar', '교회 일정'], ['about', '교회 안내']];
   return <>
     <div className="reading-progress" aria-hidden="true"><span /></div>
     <nav className="reading-nav" aria-label="주보 바로가기">{links.map(([id, label]) => <a key={id} href={`#${id}`}>{label}</a>)}</nav>
@@ -69,10 +69,28 @@ export function BulletinContent({ data, offline = false, preview = false }: { da
       {bulletin.promotions.length > 0 && <section id="announcements" className="content-section"><SectionHeading number="04" kicker="ANNOUNCEMENTS" title="광고" icon={<Megaphone size={23} />} />
         <div className="promotion-list">{bulletin.promotions.map((card, index) => <details className="promotion-card announcement-card" key={`${index}-${card.title}`} open={index === 0}><summary><span className="promotion-number">{String(index + 1).padStart(2, '0')}</span><span><strong>{card.title}</strong><small>눌러서 자세히 보기</small></span><ChevronRight className="announcement-chevron" size={19} /></summary><div className="announcement-body">{card.body && <p>{card.body}</p>}{card.details?.map((detail, detailIndex) => <div className="promotion-detail" key={detailIndex}><strong>{detail.title}</strong><p>{detail.body}</p></div>)}{card.url && <a href={card.url} target="_blank" rel="noreferrer" className="text-link">자세히 보기 <ArrowUpRight size={16} /></a>}</div></details>)}</div>
       </section>}
-      <section id="about" className="content-section info-section"><SectionHeading number="05" kicker="LIFE TOGETHER" title="매주 함께하는 안내" icon={<MapPin size={23} />} /><ChurchGuide siteInfo={siteInfo} /></section>
+      <ChurchCalendar events={siteInfo.churchEvents || []} />
+      <section id="about" className="content-section info-section"><SectionHeading number="06" kicker="LIFE TOGETHER" title="매주 함께하는 안내" icon={<MapPin size={23} />} /><ChurchGuide siteInfo={siteInfo} /></section>
       {!preview && <Link to="/archive" className="archive-cta"><span><small>PREVIOUS BULLETINS</small><strong>지난 주보 보기</strong></span><span className="round-arrow"><ArrowRight size={20} /></span></Link>}
     </div>
   </>;
+}
+
+function ChurchCalendar({ events }: { events: PublicData['siteInfo']['churchEvents'] }) {
+  const [month, setMonth] = useState(() => { const now = new Date(); return new Date(now.getFullYear(), now.getMonth(), 1); });
+  const firstWeekday = month.getDay();
+  const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  const monthKey = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}`;
+  const monthEvents = events.filter((event) => event.date.startsWith(monthKey)).sort((a, b) => a.date.localeCompare(b.date));
+  return <section id="calendar" className="content-section church-calendar"><SectionHeading number="05" kicker="CHURCH CALENDAR" title="교회 주요 일정" icon={<CalendarDays size={23} />} />
+    <div className="calendar-month"><button className="calendar-nav" aria-label="이전 달" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}><ArrowLeft size={18} /></button><strong>{month.getFullYear()}년 {month.getMonth() + 1}월</strong><button className="calendar-nav" aria-label="다음 달" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}><ArrowRight size={18} /></button></div>
+    <div className="calendar-grid" role="grid" aria-label={`${month.getFullYear()}년 ${month.getMonth() + 1}월 일정`}>
+      {['일', '월', '화', '수', '목', '금', '토'].map((day) => <span role="columnheader" className="calendar-weekday" key={day}>{day}</span>)}
+      {Array.from({ length: firstWeekday }, (_, i) => <span className="calendar-empty" role="gridcell" key={`empty-${i}`} />)}
+      {Array.from({ length: days }, (_, i) => { const number = i + 1; const date = `${monthKey}-${String(number).padStart(2, '0')}`; const hasEvent = monthEvents.some((event) => event.date === date); return <span role="gridcell" aria-label={`${number}일${hasEvent ? ', 일정 있음' : ''}`} className={`calendar-day${hasEvent ? ' has-event' : ''}`} key={date}>{number}{hasEvent && <i />}</span>; })}
+    </div>
+    <div className="calendar-events" aria-live="polite"><h3>{month.getMonth() + 1}월 일정</h3>{monthEvents.length ? monthEvents.map((event, i) => <article className="calendar-event" key={`${event.date}-${event.title}-${i}`}><time dateTime={event.date}><strong>{Number(event.date.slice(8))}</strong><span>{new Date(`${event.date}T12:00:00+09:00`).toLocaleDateString('ko-KR', { weekday: 'short', timeZone: 'Asia/Seoul' })}</span></time><div><h4>{event.title}</h4>{event.content && <p>{event.content}</p>}{event.contact && <a href={`tel:${event.contact.replace(/[^+\d]/g, '')}`}>문의 {event.contact}</a>}</div></article>) : <p className="calendar-empty-note">이번 달 등록된 일정이 없습니다.</p>}</div>
+  </section>;
 }
 
 export function PublicPage({ invalidRoute = false }: { invalidRoute?: boolean }) {

@@ -7,8 +7,9 @@ export const authClient = createAuthClient({ baseURL: API_BASE, fetchOptions: { 
 
 export type SiteInfo = {
   churchName: string; worshipTime: string; gatheringTime: string; introduction: string;
-  vision: string; address: string; mapUrl: string; recurringInfo?: Partial<RecurringInfo>;
+  vision: string; address: string; mapUrl: string; recurringInfo?: Partial<RecurringInfo>; churchEvents: ChurchEvent[];
 };
+export type ChurchEvent = { title: string; date: string; content: string; contact: string };
 export type WorshipItem = { label: string; content: string; assignee: string };
 export type CommunityNews = { category: '새가족' | '등반' | '결혼' | '군입대'; content: string };
 export type Promotion = { title: string; body: string; details: { title: string; body: string }[]; url: string };

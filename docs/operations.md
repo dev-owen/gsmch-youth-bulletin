@@ -28,6 +28,12 @@ npx auth migrate --config ./auth.config.ts --yes
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/schema.sql
 ```
 
+기존 운영 DB에는 새 기능의 컬럼만 다음 마이그레이션으로 적용합니다.
+
+```sh
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/migrations/20261105-church-events.sql
+```
+
 `BETTER_AUTH_SECRET`도 이 셸에 설정해야 합니다. 운영 비밀값은 Git에 넣지 않습니다. `auth.config.ts`는 CLI가 인증 테이블을 만드는 데 사용합니다.
 
 주기적인 논리 백업은 다음처럼 **접근이 제한된 저장 위치**에 만들 수 있습니다. 파일에는 사용자·세션 정보가 포함될 수 있습니다.
