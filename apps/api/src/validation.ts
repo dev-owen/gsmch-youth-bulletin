@@ -42,14 +42,16 @@ const promotionDetailInput = z.object({
 });
 
 const communityPerson = z.object({ name: required(80), peer: required(40) });
+const communityWedding = z.object({
+  groom: communityPerson, bride: communityPerson,
+  dateTime: required(120), location: required(200),
+});
 export const communityNewsInput = z.object({
   category: z.enum(['새가족', '등반', '결혼', '군입대']),
   content: bounded(20000).default(''),
   people: z.array(communityPerson).min(1).max(100).optional(),
-  wedding: z.object({
-    groom: communityPerson, bride: communityPerson,
-    dateTime: required(120), location: required(200),
-  }).optional(),
+  wedding: communityWedding.optional(),
+  weddings: z.array(communityWedding).min(1).max(30).optional(),
 }).superRefine((news, context) => {
   if (news.people !== undefined && news.category !== '새가족' && news.category !== '등반') {
     context.addIssue({ code: 'custom', path: ['people'], message: '명단은 새가족·등반 소식에만 입력할 수 있습니다.' });
@@ -57,15 +59,24 @@ export const communityNewsInput = z.object({
   if (news.wedding !== undefined && news.category !== '결혼') {
     context.addIssue({ code: 'custom', path: ['wedding'], message: '예식 정보는 결혼 소식에만 입력할 수 있습니다.' });
   }
-  if (news.people === undefined && news.wedding === undefined && (!news.content || news.content.length > 300)) {
+  if (news.weddings !== undefined && news.category !== '결혼') {
+    context.addIssue({ code: 'custom', path: ['weddings'], message: '예식 정보는 결혼 소식에만 입력할 수 있습니다.' });
+  }
+  if (news.wedding !== undefined && news.weddings !== undefined) {
+    context.addIssue({ code: 'custom', path: ['weddings'], message: '단일 커플 정보와 여러 커플 정보를 동시에 입력할 수 없습니다.' });
+  }
+  if (news.people === undefined && news.wedding === undefined && news.weddings === undefined && (!news.content || news.content.length > 300)) {
     context.addIssue({ code: 'custom', path: ['content'], message: '소식 내용을 1~300자로 입력해 주세요.' });
   }
 }).transform((news) => {
   const person = ({ name, peer }: z.infer<typeof communityPerson>) => `${name} (${peer})`;
   if (news.people) return { ...news, content: news.people.map(person).join('\n') };
-  if (news.wedding) {
-    const { groom, bride, dateTime, location } = news.wedding;
-    return { ...news, content: `신랑 ${person(groom)} · 신부 ${person(bride)}\n일시: ${dateTime}\n장소: ${location}` };
+  const weddings = news.weddings ?? (news.wedding ? [news.wedding] : undefined);
+  if (weddings) {
+    const content = weddings.map(({ groom, bride, dateTime, location }) =>
+      `신랑 ${person(groom)} · 신부 ${person(bride)}\n일시: ${dateTime}\n장소: ${location}`
+    ).join('\n\n');
+    return { ...news, content };
   }
   return news;
 });

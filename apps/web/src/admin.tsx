@@ -8,6 +8,7 @@ import { RecurringInfoEditor } from './church-info-editor';
 import { optimizeImage } from './media';
 import { PromotionEditor } from './promotion-editor';
 import { CommunityNewsEditor } from './community-news-editor';
+import './editor-actions.css';
 
 type AdminStatus = 'checking' | 'ready' | 'login' | 'forbidden' | 'error';
 function ErrorNote({ text }: { text: string }) { return text ? <div className="form-error" role="alert">{text}</div> : null; }
@@ -79,6 +80,11 @@ function BulletinEditor({ id }: { id: string }) {
   const [notice, setNotice] = useState('');
   const formRef = useRef<BulletinInput | null>(null);
   useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(''), 3600);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+  useEffect(() => {
     Promise.all([api<{ bulletin: Bulletin; calendarEvents?: CalendarEvent[] }>(`/v1/admin/bulletins/${id}`), api<{ siteInfo: SiteInfo }>('/v1/admin/site-info')]).then(([b, s]) => {
       const input = toInput(b.bulletin);
       setBulletin(b.bulletin); setSiteInfo(s.siteInfo); setCalendarEvents(b.calendarEvents || []); formRef.current = input; setForm(input);
@@ -131,8 +137,7 @@ function BulletinEditor({ id }: { id: string }) {
   }
   if (!form || !bulletin || !siteInfo) return <div className="admin-page"><Link to="/admin" className="back-link"><ArrowLeft size={16} /> 주보 목록</Link><div className="admin-empty">{error || '주보를 불러오는 중입니다.'}</div></div>;
   const previewBulletin: Bulletin = { ...bulletin, ...form, cover: form.coverMediaId && bulletin.cover ? { ...bulletin.cover, altText: form.coverAltText } : null };
-  return <div className="admin-page"><div className="editor-heading"><Link to="/admin" className="back-link"><ArrowLeft size={16} /> 주보 목록</Link><div className="admin-page-heading"><div><span className="eyebrow dark">BULLETIN EDITOR</span><h1>{bulletin.status === 'published' ? '주보 수정' : '주보 작성'}</h1><p>내용을 저장한 뒤 모바일 미리보기에서 확인하고 발행하세요.</p></div><span className={`status-chip ${bulletin.status}`}>{bulletin.status === 'published' ? '발행됨' : '초안'}</span></div></div>
-    <div className="editor-actions"><button className="secondary-button" onClick={() => setPreview(true)}><Eye size={17} /> 모바일 미리보기</button><button className="secondary-button" disabled={busy || uploading} onClick={() => void save()}><Save size={17} /> {busy ? '처리 중…' : '저장'}</button>{bulletin.status === 'draft' && <button className="primary-button" disabled={busy || dirty || uploading} onClick={publish}><Check size={17} /> 발행</button>}</div>
+  return <div className="admin-page bulletin-editor-page"><div className="editor-heading"><Link to="/admin" className="back-link"><ArrowLeft size={16} /> 주보 목록</Link><div className="admin-page-heading"><div><span className="eyebrow dark">BULLETIN EDITOR</span><h1>{bulletin.status === 'published' ? '주보 수정' : '주보 작성'}</h1><p>내용을 저장한 뒤 모바일 미리보기에서 확인하고 발행하세요.</p></div><span className={`status-chip ${bulletin.status}`}>{bulletin.status === 'published' ? '발행됨' : '초안'}</span></div></div>
     <ErrorNote text={error} />{notice && <div className="form-notice" role="status">{notice}</div>}
     <div className="editor-grid"><div className="editor-column"><section className="editor-card"><div className="editor-card-head"><span className="editor-card-number">01</span><div><h2>표지</h2><p>이번 주 예배의 첫 화면입니다.</p></div></div><div className="field-grid"><label className="field">예배 날짜<input type="date" value={form.serviceDate} disabled={bulletin.status === 'published'} onChange={(e) => update({ serviceDate: e.target.value })} /></label><label className="field">이번 주 주제<input value={form.theme} maxLength={160} onChange={(e) => update({ theme: e.target.value })} placeholder="예: 함께 걷는 믿음" /></label></div>
       <div className="upload-box"><ImagePlus size={22} /><div><strong>대표 이미지</strong><p>선택 사항 · JPG, PNG, WebP · 원본 20MB 이하 · 긴 변 최대 1,920px, 512KB 이하로 자동 압축</p></div></div>
@@ -144,7 +149,7 @@ function BulletinEditor({ id }: { id: string }) {
     <section className="editor-card"><div className="editor-card-head"><span className="editor-card-number">03</span><div><h2>설교</h2><p>오늘의 말씀을 소개합니다.</p></div></div><label className="field">설교 제목<input value={form.sermonTitle} onChange={(e) => update({ sermonTitle: e.target.value })} placeholder="설교 제목" /></label><div className="field-grid"><label className="field">성경 본문<input value={form.scripture} onChange={(e) => update({ scripture: e.target.value })} placeholder="예: 요한복음 15:1–8" /></label><label className="field">설교자<input value={form.preacher} onChange={(e) => update({ preacher: e.target.value })} placeholder="설교자 이름" /></label></div></section>
     <CommunityNewsEditor value={form.communityNews} onChange={(communityNews) => update({ communityNews })} />
     <PromotionEditor value={form.promotions} serviceDate={form.serviceDate} onChange={(promotions) => update({ promotions })} />
-    </div><aside className="editor-guide"><div className="guide-card"><span className="eyebrow dark">PUBLISHING GUIDE</span><h3>발행 전 확인</h3><ul><li>예배 날짜와 주제를 입력했나요?</li><li>모든 예배 순서에 담당자가 있나요?</li><li>설교 정보가 정확한가요?</li><li>광고 링크가 있다면 열리나요?</li></ul><p>저장만 하면 공개 주보는 바뀌지 않습니다. 발행 버튼을 누르면 같은 QR 주소에 새 주보가 표시됩니다.</p></div><button className="preview-aside" onClick={() => setPreview(true)}><Eye size={20} /><span><strong>모바일 미리보기</strong><small>실제 방문자 화면으로 확인</small></span><ChevronRight size={18} /></button></aside></div>
+    </div><aside className="editor-guide"><div className="editor-actions" role="group" aria-label="주보 편집 작업"><button className="secondary-button" onClick={() => setPreview(true)}><Eye size={17} /> 모바일 미리보기</button><button className="secondary-button" disabled={busy || uploading} onClick={() => void save()}><Save size={17} /> {busy ? '처리 중…' : '저장'}</button>{bulletin.status === 'draft' && <button className="primary-button" disabled={busy || dirty || uploading} onClick={publish}><Check size={17} /> 발행</button>}</div><div className="guide-card"><span className="eyebrow dark">PUBLISHING GUIDE</span><h3>발행 전 확인</h3><ul><li>예배 날짜와 주제를 입력했나요?</li><li>모든 예배 순서에 담당자가 있나요?</li><li>설교 정보가 정확한가요?</li><li>광고 링크가 있다면 열리나요?</li></ul><p>저장만 하면 공개 주보는 바뀌지 않습니다. 발행 버튼을 누르면 같은 QR 주소에 새 주보가 표시됩니다.</p></div></aside></div>
     {preview && <div className="preview-overlay" role="dialog" aria-modal="true" aria-label="모바일 미리보기"><div className="preview-dialog"><div className="preview-toolbar"><strong>모바일 미리보기</strong><button className="icon-button" aria-label="닫기" onClick={() => setPreview(false)}><X size={21} /></button></div><div className="preview-device"><BulletinContent data={{ bulletin: previewBulletin, siteInfo, calendarEvents }} preview /></div><div className="preview-footer"><button className="secondary-button" onClick={() => setPreview(false)}>편집으로 돌아가기</button></div></div></div>}
   </div>;
 }
@@ -157,6 +162,11 @@ function SiteInfoEditor() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(''), 3600);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
   useEffect(() => { api<{ siteInfo: SiteInfo }>('/v1/admin/site-info').then((r) => setForm(normalizeSiteInfo(r.siteInfo))).catch((e) => setError(e.message)); }, []);
   function update(key: keyof SiteInfo, value: string) { setForm((f) => f ? { ...f, [key]: value } : f); setNotice(''); }
   function updateEvent(index: number, key: keyof ChurchEvent, value: string) {

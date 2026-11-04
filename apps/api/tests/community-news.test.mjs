@@ -9,6 +9,34 @@ import { getBulletin, replaceBulletin } from '../.test-dist/db.js';
 
 const people = [{ name: '김새봄', peer: '95또래' }, { name: '이하늘', peer: '96또래' }];
 const wedding = { groom: people[0], bride: people[1], dateTime: '2026년 11월 14일 (토) 오후 2시', location: '예식장 3층 그레이스홀' };
+const secondWedding = { groom: { name: '박청년', peer: '94또래' }, bride: { name: '최사랑', peer: '95또래' }, dateTime: '2026년 11월 21일 (토) 낮 12시', location: '다른 예식장 2층 사랑홀' };
+
+test('retains multiple couples with separate wedding times and locations in one news item', () => {
+  const weddings = [wedding, secondWedding];
+  const news = communityNewsInput.parse({ category: '결혼', weddings });
+  assert.deepEqual(news.weddings, weddings);
+  assert.equal(news.wedding, undefined);
+  for (const couple of weddings) {
+    for (const value of [couple.groom.name, couple.bride.name, couple.dateTime, couple.location]) assert.ok(news.content.includes(value));
+  }
+  assert.ok(news.content.indexOf(wedding.groom.name) < news.content.indexOf(secondWedding.groom.name));
+  assert.deepEqual(communityNewsInput.parse(news), news);
+});
+
+test('validates every couple and rejects empty, oversized, ambiguous, or misplaced lists', () => {
+  for (const role of ['groom', 'bride']) {
+    for (const field of ['name', 'peer']) {
+      const incomplete = { ...secondWedding, [role]: { ...secondWedding[role], [field]: ' ' } };
+      assert.equal(communityNewsInput.safeParse({ category: '결혼', content: '기존 내용', weddings: [wedding, incomplete] }).success, false);
+    }
+  }
+  for (const field of ['dateTime', 'location']) assert.equal(communityNewsInput.safeParse({ category: '결혼', weddings: [wedding, { ...secondWedding, [field]: ' ' }] }).success, false);
+  for (const weddings of [[], Array(31).fill(wedding)]) assert.equal(communityNewsInput.safeParse({ category: '결혼', weddings }).success, false);
+  for (const category of ['새가족', '등반', '군입대']) assert.equal(communityNewsInput.safeParse({ category, weddings: [wedding] }).success, false);
+  assert.equal(communityNewsInput.safeParse({ category: '결혼', wedding, weddings: [secondWedding] }).success, false);
+  const full = communityNewsInput.parse({ category: '결혼', weddings: Array(30).fill(wedding) });
+  assert.deepEqual(communityNewsInput.parse(full), full);
+});
 
 test('accepts multiple name/peer pairs and retains their order in both member categories', () => {
   for (const category of ['새가족', '등반']) {
@@ -57,17 +85,18 @@ test('preserves legacy text and military news but rejects structured fields in t
 test('writes and reloads structured and legacy news without losing individual fields', async () => {
   const input = bulletinInput.parse({
     serviceDate: '2026-11-15', theme: '', coverMediaId: null, coverAltText: '', sermonTitle: '', scripture: '', preacher: '', worshipItems: [], promotions: [],
-    communityNews: [{ category: '새가족', people }, { category: '등반', people: [...people].reverse() }, { category: '결혼', wedding }, { category: '군입대', content: '김청년 입대' }, { category: '새가족', content: '기존 새가족 소식' }],
+    communityNews: [{ category: '새가족', people }, { category: '등반', people: [...people].reverse() }, { category: '결혼', wedding }, { category: '결혼', weddings: [wedding, secondWedding] }, { category: '군입대', content: '김청년 입대' }, { category: '새가족', content: '기존 새가족 소식' }],
   });
   const stored = [];
   await replaceBulletin({ query: async (sql, values) => {
     if (sql.startsWith('INSERT INTO community_news')) {
       assert.match(sql, /details/);
-      stored.push({ category: values[2], content: values[3], details: JSON.parse(values[4]) });
+      if (values.length === 2) stored.push(...JSON.parse(values[1]));
+      else stored.push({ category: values[2], content: values[3], details: JSON.parse(values[4]) });
     }
     return { rows: [] };
   } }, 'bulletin-id', input);
-  assert.equal(stored.length, 5);
+  assert.equal(stored.length, 6);
   const result = await getBulletin({ query: async (sql) => {
     if (sql.includes('FROM bulletins b')) return { rows: [{ id: 'bulletin-id', service_date: input.serviceDate }] };
     if (sql.includes('FROM community_news')) { assert.match(sql, /details/); return { rows: stored }; }
@@ -90,4 +119,12 @@ test('renders every member, wedding detail and legacy text in public news cards'
   const marriage = markup({ category: '결혼', wedding });
   for (const text of ['신랑', '신부', '김새봄', '이하늘', '95또래', '96또래', '일시', wedding.dateTime, '장소', wedding.location]) assert.ok(marriage.includes(text));
   assert.match(markup({ category: '결혼', content: '기존 예식 안내' }), /기존 예식 안내/);
+});
+
+test('renders multiple couples as separate wedding information groups in the same card', () => {
+  const marriage = renderToStaticMarkup(React.createElement(CommunityNewsContent, { news: { category: '결혼', weddings: [wedding, secondWedding] } }));
+  assert.equal((marriage.match(/<dl /g) || []).length, 2);
+  for (const couple of [wedding, secondWedding]) {
+    for (const text of [couple.groom.name, couple.groom.peer, couple.bride.name, couple.bride.peer, couple.dateTime, couple.location]) assert.ok(marriage.includes(text));
+  }
 });

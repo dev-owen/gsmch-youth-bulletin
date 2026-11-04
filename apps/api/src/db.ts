@@ -28,7 +28,7 @@ export async function getBulletin(db: Queryable, condition: string, value: strin
   const b = result.rows[0];
   const [items, community, promotions] = await Promise.all([
     db.query<{ label: string; content: string; assignee: string }>('SELECT label, content, assignee FROM worship_items WHERE bulletin_id = $1 ORDER BY position', [b.id]),
-    db.query<{ category: string; content: string; details: Pick<BulletinInput['communityNews'][number], 'people' | 'wedding'> }>('SELECT category, content, details FROM community_news WHERE bulletin_id = $1 ORDER BY position', [b.id]),
+    db.query<{ category: string; content: string; details: Pick<BulletinInput['communityNews'][number], 'people' | 'wedding' | 'weddings'> }>('SELECT category, content, details FROM community_news WHERE bulletin_id = $1 ORDER BY position', [b.id]),
     db.query<{ title: string; body: string; details: BulletinInput['promotions'][number]['details']; url: string | null }>('SELECT title, body, details, url FROM promotions WHERE bulletin_id = $1 ORDER BY position', [b.id]),
   ]);
   return {
@@ -86,7 +86,7 @@ export async function replaceBulletin(client: PoolClient, id: string, data: Bull
     `INSERT INTO community_news (bulletin_id, position, category, content, details)
      SELECT $1, ordinality - 1, category, content, details
      FROM jsonb_to_recordset($2::jsonb) WITH ORDINALITY AS x(category text, content text, details jsonb, ordinality bigint)`,
-    [id, JSON.stringify(data.communityNews.map(({ category, content, people, wedding }) => ({ category, content, details: { people, wedding } })))]
+    [id, JSON.stringify(data.communityNews.map(({ category, content, people, wedding, weddings }) => ({ category, content, details: { people, wedding, weddings } })))]
   );
   if (data.promotions.length) await client.query(
     `INSERT INTO promotions (bulletin_id, position, title, body, details, url)

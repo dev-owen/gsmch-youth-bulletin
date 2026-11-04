@@ -15,7 +15,7 @@ export type CommunityPerson = { name: string; peer: string };
 export type CommunityWedding = { groom: CommunityPerson; bride: CommunityPerson; dateTime: string; location: string };
 export type CommunityNews = {
   category: '새가족' | '등반' | '결혼' | '군입대'; content: string;
-  people?: CommunityPerson[]; wedding?: CommunityWedding;
+  people?: CommunityPerson[]; wedding?: CommunityWedding; weddings?: CommunityWedding[];
 };
 export type PromotionSchedule = { startDate: string; endDate: string; allDay: boolean; startTime: string; endTime: string };
 export type PromotionDetail = { type?: 'text' | 'schedule'; title: string; body: string; schedule?: PromotionSchedule };
