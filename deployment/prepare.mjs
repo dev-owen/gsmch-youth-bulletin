@@ -38,6 +38,7 @@ const workerConfig = {
   main: 'src/index.ts',
   compatibility_date: '2026-10-24',
   compatibility_flags: ['nodejs_compat'],
+  ai: { binding: 'AI', remote: true },
   upload_source_maps: true,
   observability: { enabled: true, head_sampling_rate: 1 },
   secrets: { required: ['BETTER_AUTH_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'] },

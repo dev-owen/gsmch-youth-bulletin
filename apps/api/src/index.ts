@@ -5,6 +5,7 @@ import { ZodError } from 'zod';
 import { createAuth } from './auth';
 import { getBulletin, getPromotionCalendarEvents, getSiteInfo, replaceBulletin, toWorshipItem, transaction, type WorshipItemRow } from './db';
 import { readImage } from './media';
+import { automaticContentTranslation } from './content-translation';
 import { publicResponseCache } from './public-cache';
 import type { AppEnv } from './types';
 import { bulletinInput, dateSchema, siteInfoInput, worshipItemsComplete } from './validation';
@@ -17,6 +18,8 @@ const publicationError = '날짜·주제·설교와 예배 순서 담당자를 �
 
 app.use('/api/auth/*', (c, next) => cors({ origin: c.env.WEB_ORIGIN, credentials: true })(c, next));
 app.use('/v1/*', (c, next) => cors({ origin: c.env.WEB_ORIGIN, credentials: true })(c, next));
+// Translate only published public responses, after the source cache has finished.
+app.use('/v1/*', automaticContentTranslation());
 // Cache hits return before opening a database pool. CORS is applied per request.
 app.use('/v1/*', publicResponseCache());
 

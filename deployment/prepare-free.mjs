@@ -35,6 +35,7 @@ const workerConfig = {
   main: 'src/index.ts',
   compatibility_date: '2026-10-24',
   compatibility_flags: ['nodejs_compat'],
+  ai: { binding: 'AI', remote: true },
   workers_dev: true,
   preview_urls: false,
   upload_source_maps: true,

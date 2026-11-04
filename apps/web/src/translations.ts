@@ -11,6 +11,10 @@ export const isLanguage = (value: unknown): value is Language => languages.some(
 // Korean is the source language; each entry contains English and Simplified Chinese.
 const translations = {
   '언어 설정': ['Language', '语言设置'],
+  '자동 번역 중입니다. 준비된 내용부터 표시합니다.': ['Translating… Showing available content as it becomes ready.', '正在翻译，将逐步显示已完成的内容。'],
+  '자동 번역된 내용입니다.': ['This content is automatically translated.', '此内容由自动翻译生成。'],
+  '번역을 불러오지 못한 내용은 한국어 원문으로 표시합니다.': ['Content without an available translation is shown in Korean.', '暂时无法翻译的内容将显示韩语原文。'],
+  '번역 다시 시도': ['Retry translation', '重新翻译'],
   '선한목자 젊은이교회': ['Good Shepherd Youth Church', '善牧青年教会'],
   '주보 홈': ['Bulletin home', '周报首页'],
   '모바일 주보': ['Mobile bulletin', '手机周报'],

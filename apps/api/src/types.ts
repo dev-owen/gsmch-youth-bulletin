@@ -1,6 +1,7 @@
 import type { Pool } from 'pg';
 
 export type Bindings = {
+  AI?: Ai;
   HYPERDRIVE?: { connectionString: string };
   MEDIA: R2Bucket;
   DATABASE_URL?: string;

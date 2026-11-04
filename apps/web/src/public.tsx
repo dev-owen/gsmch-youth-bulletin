@@ -15,6 +15,8 @@ import { BulletinBody, CompactDisclosure, useCompactBulletin } from './compact-d
 import { useLanguage } from './language';
 import { LanguageSelector } from './language-selector';
 import type { TranslationKey } from './translations';
+import { useContentTranslation } from './use-content-translation';
+import { ContentTranslationNotice } from './content-translation-notice';
 
 function Brand({ home = false }: { home?: boolean }) {
   const { t } = useLanguage();
@@ -149,6 +151,7 @@ export function PublicPage({ invalidRoute = false }: { invalidRoute?: boolean })
   const { date } = useParams();
   const validRoute = !invalidRoute && (!date || /^\d{4}-\d{2}-\d{2}$/.test(date));
   const { data, offline, error: loadError } = usePublicApi<PublicData>(validRoute ? (date ? `/v1/bulletins/${date}` : '/v1/bulletins/current') : null);
+  const translation = useContentTranslation(data, validRoute ? (date ? `/v1/bulletins/${date}` : '/v1/bulletins/current') : null);
   const error = !validRoute || (loadError && 'status' in loadError && loadError.status === 404) ? 'not-found'
     : loadError ? (!date && (!('status' in loadError) || !navigator.onLine) ? 'no-cache' : 'load-failed') : '';
   useEffect(() => {
@@ -156,15 +159,22 @@ export function PublicPage({ invalidRoute = false }: { invalidRoute?: boolean })
   }, [date, validRoute, data, loadError]);
   return <div className="public-shell"><Brand home={!date} />
     <main className="public-main">{date && <Link to="/archive" className="back-link"><ArrowLeft size={16} /> {t('지난 주보 목록')}</Link>}
-      {error ? <Status><WifiOff size={24} /><p>{t(error === 'not-found' ? '페이지를 찾을 수 없습니다.' : error === 'no-cache' ? '저장된 주보가 없습니다. 인터넷 연결 후 다시 열어 주세요.' : '주보를 불러오지 못했습니다.')}</p><Link to="/">{t('홈으로 가기')}</Link></Status> : data ? <BulletinContent data={data} offline={offline} /> : <Status><span className="loading-spinner" /><p>{t('주보를 불러오는 중입니다.')}</p></Status>}
+      {error ? <Status><WifiOff size={24} /><p>{t(error === 'not-found' ? '페이지를 찾을 수 없습니다.' : error === 'no-cache' ? '저장된 주보가 없습니다. 인터넷 연결 후 다시 열어 주세요.' : '주보를 불러오지 못했습니다.')}</p><Link to="/">{t('홈으로 가기')}</Link></Status> : data ? <><ContentTranslationNotice status={translation.status} retry={translation.retry} /><BulletinContent data={translation.data || data} offline={offline} /></> : <Status><span className="loading-spinner" /><p>{t('주보를 불러오는 중입니다.')}</p></Status>}
     </main><Footer /></div>;
 }
 
 function Footer() { const { t } = useLanguage(); return <footer className="site-footer"><span>✦</span><p>{t('선한목자 젊은이교회')}<small>{t('함께 걷는 믿음의 여정')}</small></p><Link to="/admin">{t('관리자')}</Link></footer>; }
 
-export function ArchivePage() {
+type ArchiveData = { items: { id: string; serviceDate: string; theme: string }[]; nextCursor: string | null };
+
+function ArchiveEntries({ page, path }: { page: ArchiveData; path: string }) {
   const { t, locale } = useLanguage();
-  type ArchiveData = { items: { id: string; serviceDate: string; theme: string }[]; nextCursor: string | null };
+  const translation = useContentTranslation(page, path);
+  return <><ContentTranslationNotice status={translation.status} retry={translation.retry} />{(translation.data || page).items.map((item) => <Link className="archive-item" key={item.id} to={`/bulletins/${item.serviceDate}`}><span className="archive-calendar"><CalendarDays size={22} /></span><span><small>{shortDate(item.serviceDate, locale)}</small><strong>{item.theme || t('주일 예배')}</strong></span><ChevronRight size={20} /></Link>)}</>;
+}
+
+export function ArchivePage() {
+  const { t } = useLanguage();
   const { data, error, reload } = usePublicApi<ArchiveData>('/v1/bulletins');
   const baseKey = data ? JSON.stringify(data) : '';
   const [pagination, setPagination] = useState<{ base: string; pages: ArchiveData[]; loading: boolean; error: boolean }>({ base: '', pages: [], loading: false, error: false });
@@ -186,7 +196,7 @@ export function ArchivePage() {
   return <div className="public-shell"><Brand /><main className="archive-main"><Link to="/" className="back-link"><ArrowLeft size={16} /> {t('이번 주 주보')}</Link>
     <div className="archive-heading"><span className="eyebrow dark">OUR JOURNEY</span><h1>{t('지난 주보')}</h1><p>{t('함께 드린 예배의 기록을 다시 만나보세요.')}</p></div>
     {(error || pageError) && <Status><p>{t('목록을 불러오지 못했습니다.')}</p><button className="simple-button" onClick={error ? reload : loadMore}>{t('다시 시도')}</button></Status>}
-    <div className="archive-list">{items.map((item) => <Link className="archive-item" key={item.id} to={`/bulletins/${item.serviceDate}`}><span className="archive-calendar"><CalendarDays size={22} /></span><span><small>{shortDate(item.serviceDate, locale)}</small><strong>{item.theme || t('주일 예배')}</strong></span><ChevronRight size={20} /></Link>)}</div>
+    <div className="archive-list">{data && <ArchiveEntries page={data} path="/v1/bulletins" />}{pages.map((page, index) => <ArchiveEntries key={index} page={page} path={`/v1/bulletins?cursor=${encodeURIComponent(index ? pages[index - 1].nextCursor! : data!.nextCursor!)}`} />)}</div>
     {!loading && !error && items.length === 0 && <Status><p>{t('아직 발행된 주보가 없습니다.')}</p></Status>}
     {(loading || loadingMore) && <Status><span className="loading-spinner" /><p>{t('불러오는 중입니다.')}</p></Status>}
     {!loadingMore && cursor && <button className="load-more" onClick={loadMore}>{t('더 보기')} <ArrowRight size={16} /></button>}

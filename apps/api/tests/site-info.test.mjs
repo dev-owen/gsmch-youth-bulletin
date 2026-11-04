@@ -1,14 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import ts from 'typescript';
 import { siteInfoInput } from '../.test-dist/validation.js';
 import { getSiteInfo } from '../.test-dist/db.js';
 
-// 실제 프런트엔드 기본값을 API 스키마와 함께 검증해 두 형식의 불일치를 감지합니다.
-const source = await readFile(new URL('../../web/src/church-info.ts', import.meta.url), 'utf8');
-const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } });
-const { normalizeSiteInfo, defaultRecurringInfo } = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`);
+import { normalizeSiteInfo, defaultRecurringInfo } from '../.test-dist/church-info.js';
+
 const legacyInfo = { churchName: '선한목자 젊은이교회', worshipTime: '', gatheringTime: '', introduction: '', vision: '', address: '', mapUrl: '' };
 
 test('photo-based recurring defaults are accepted and retained by the API', () => {
