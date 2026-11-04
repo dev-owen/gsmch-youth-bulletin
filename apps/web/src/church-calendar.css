@@ -4,15 +4,12 @@
 .church-calendar .calendar-table .calendar-day{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;gap:5px;min-height:3.8rem;padding:5px 0;font-weight:400}
 .church-calendar .calendar-day>time{font-size:.875rem;line-height:1.5;color:#475c6d}
 .church-calendar .calendar-day.has-event>time{font-weight:800}
-.church-calendar .calendar-markers{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:4px;max-width:100%;min-height:1rem}
-.church-calendar .calendar-marker{display:inline-block;flex-shrink:0;color:var(--event-color);background:var(--event-background);border:1px solid var(--event-border)}
+.church-calendar .calendar-markers{display:flex;justify-content:center;align-items:center;gap:4px;max-width:100%;min-height:1rem}
+.church-calendar .calendar-marker{display:inline-block;flex-shrink:0}
 .church-calendar .calendar-dot{width:7px;height:7px;border:0;border-radius:50%;background:var(--event-color)}
-.church-calendar .calendar-boundary{max-width:100%;border-radius:4px;padding:2px 4px;font-size:.625rem;line-height:1.3;font-weight:700;overflow-wrap:anywhere}
+.church-calendar .calendar-more{font-size:.6875rem;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;color:inherit}
 .church-calendar .calendar-marker-help{margin:9px 0 0;font-size:.75rem;line-height:1.7;color:#718596}
 .church-calendar .calendar-colored-event{border-left:3px solid var(--event-color);padding-left:10px}
-.church-calendar .calendar-colored-event .calendar-event-date{display:flex;flex:0 0 50px;flex-direction:column;align-items:center;gap:1px;align-self:flex-start;border-radius:5px;padding:6px 2px;background:var(--event-background);color:var(--event-color)}
-.church-calendar .calendar-colored-event .calendar-event-date time{width:auto;flex:none;min-width:0;color:inherit}
-.church-calendar .calendar-colored-event .calendar-event-date.is-range time{display:block;font-size:.8125rem;line-height:1.5;font-weight:700}
-.church-calendar .calendar-event-date.is-range>span{font-size:.75rem;line-height:1}
+.church-calendar .calendar-event-content{flex:1}
 .church-calendar .calendar-colored-event h4{display:flex;align-items:baseline;gap:7px}
 .church-calendar .calendar-event-color{display:inline-block;flex:0 0 7px;height:7px;border-radius:50%;background:var(--event-color)}

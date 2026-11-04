@@ -131,19 +131,14 @@ function ChurchCalendar({ events, initialDate }: { events: CalendarEvent[]; init
         if (day === null) return <td key={weekday} />;
         const date = `${monthKey}-${String(day).padStart(2, '0')}`;
         const markers = monthEvents.flatMap((event) => { const kind = eventMarkerOnDate(event, date); return kind ? [{ event, kind }] : []; });
-        return <td key={weekday}><div className={`calendar-day${markers.length ? ' has-event' : ''}`}><time dateTime={date}>{day}</time><div className="calendar-markers">{markers.map(({ event, kind }, index) => {
-          const label = `${event.title}${kind === 'start' ? ` ${t('시작')}` : kind === 'end' ? ` ${t('종료')}` : ''}`;
-          return <span className={`calendar-marker ${kind === 'single' ? 'calendar-dot' : 'calendar-boundary'}`} style={eventStyles.get(event)} role="img" aria-label={label} title={label} key={index}>{kind !== 'single' && t(kind === 'start' ? '시작' : '종료')}</span>;
-        })}</div></div></td>;
+        const label = markers.map(({ event, kind }) => `${event.title}${kind === 'start' ? ` ${t('시작')}` : kind === 'end' ? ` ${t('종료')}` : ''}`).join(', ');
+        return <td key={weekday}><div className={`calendar-day${markers.length ? ' has-event' : ''}`}><time dateTime={date}>{day}</time><span className="calendar-markers" role={markers.length ? 'img' : undefined} aria-label={label || undefined} title={label || undefined}>{markers.length > 0 && <><span className="calendar-marker calendar-dot" style={eventStyles.get(markers[0].event)} aria-hidden="true" />{markers.length > 1 && <span className="calendar-more" aria-hidden="true">+{markers.length - 1}</span>}</>}</span></div></td>;
       })}</tr>)}</tbody>
     </table>
     <p className="calendar-marker-help">{t('일정별 색상으로 구분합니다. 기간 일정은 시작·종료일만 표시합니다.')}</p>
-    <div className="calendar-events" aria-live="polite"><h3>{t('{month} 일정', { month: monthName })}</h3>{monthEvents.length ? monthEvents.map((event, i) => {
-      const endDate = event.endDate || event.startDate;
-      const isRange = endDate !== event.startDate;
-      const rangeDate = (date: string) => `${Number(date.slice(5, 7))}.${Number(date.slice(8))}`;
-      return <article className="calendar-event calendar-colored-event" style={eventStyles.get(event)} key={`${event.startDate}-${event.title}-${i}`}><div className={`calendar-event-date${isRange ? ' is-range' : ''}`}>{isRange ? <><time dateTime={event.startDate}>{rangeDate(event.startDate)}</time><span aria-label={t('부터')}>~</span><time dateTime={endDate}>{rangeDate(endDate)}</time></> : <time dateTime={event.startDate}><strong>{Number(event.startDate.slice(8))}</strong><span>{new Date(`${event.startDate}T12:00:00+09:00`).toLocaleDateString(locale, { weekday: 'short', timeZone: 'Asia/Seoul' })}</span></time>}</div><div>{event.sourceTitle && event.sourceTitle !== event.title && <small className="calendar-source">{event.sourceTitle}</small>}<h4><span className="calendar-event-color" aria-hidden="true" />{event.title}</h4><p className="calendar-event-schedule">{formatSchedule(event, locale)}</p>{event.content && <p>{event.content}</p>}{event.contact && <a href={`tel:${event.contact.replace(/[^+\d]/g, '')}`}>{t('문의')} {event.contact}</a>}{event.url && <PromotionLink url={event.url} label={event.linkLabel} />}</div></article>;
-    }) : <p className="calendar-empty-note">{t('이번 달 등록된 일정이 없습니다.')}</p>}</div>
+    <div className="calendar-events" aria-live="polite"><h3>{t('{month} 일정', { month: monthName })}</h3>{monthEvents.length ? monthEvents.map((event, i) =>
+      <article className="calendar-event calendar-colored-event" style={eventStyles.get(event)} key={`${event.startDate}-${event.title}-${i}`}><div className="calendar-event-content">{event.sourceTitle && event.sourceTitle !== event.title && <small className="calendar-source">{event.sourceTitle}</small>}<h4><span className="calendar-event-color" aria-hidden="true" />{event.title}</h4><p className="calendar-event-schedule">{formatSchedule(event, locale)}</p>{event.content && <p>{event.content}</p>}{event.contact && <a href={`tel:${event.contact.replace(/[^+\d]/g, '')}`}>{t('문의')} {event.contact}</a>}{event.url && <PromotionLink url={event.url} label={event.linkLabel} />}</div></article>
+    ) : <p className="calendar-empty-note">{t('이번 달 등록된 일정이 없습니다.')}</p>}</div>
     </CompactDisclosure>
   </section>;
 }
