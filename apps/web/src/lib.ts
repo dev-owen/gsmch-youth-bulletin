@@ -9,7 +9,7 @@ export type SiteInfo = {
   churchName: string; worshipTime: string; gatheringTime: string; introduction: string;
   vision: string; address: string; mapUrl: string; recurringInfo?: Partial<RecurringInfo>; churchEvents: ChurchEvent[];
 };
-export type ChurchEvent = { title: string; date: string; content: string; contact: string };
+export type ChurchEvent = { title: string; date: string; endDate?: string; content: string; contact: string };
 export type WorshipItem = { label: string; content: string; assignee: string };
 export type CommunityPerson = { name: string; peer: string };
 export type CommunityWedding = { groom: CommunityPerson; bride: CommunityPerson; dateTime: string; location: string };

@@ -102,7 +102,7 @@ test('calendar ranges handle leap days, year boundaries, and midnight ending at 
   const midnight = { ...event, endDate: '2026-12-01', endTime: '00:00' };
   assert.equal(eventOccursOnDate(midnight, '2026-11-30'), true);
   assert.equal(eventOccursOnDate(midnight, '2026-12-01'), false);
-  assert.equal(eventsForMonth([midnight], '2026-12').length, 0);
+  assert.equal(eventsForMonth([midnight], '2026-12').length, 1);
 });
 
 test('calendar keeps prior published schedules and manual church events alongside the current draft', () => {

@@ -11,7 +11,7 @@ export function promotionCalendarEvents(bulletin: Bulletin): CalendarEvent[] {
 
 export function collectCalendarEvents(churchEvents: ChurchEvent[], publishedEvents: CalendarEvent[], bulletin: Bulletin): CalendarEvent[] {
   const manualEvents: CalendarEvent[] = churchEvents.map((event) => ({
-    startDate: event.date, endDate: event.date, allDay: true, startTime: '', endTime: '',
+    startDate: event.date, endDate: event.endDate || event.date, allDay: true, startTime: '', endTime: '',
     title: event.title, content: event.content, contact: event.contact,
   }));
   const events = [...manualEvents, ...publishedEvents.filter((event) => event.sourceBulletinId !== bulletin.id), ...promotionCalendarEvents(bulletin)];
@@ -40,12 +40,26 @@ export function eventOccursOnDate(event: CalendarEvent, date: string): boolean {
   return event.startDate <= date && date <= lastOccupiedDate(event);
 }
 
+export function eventMarkerOnDate(event: CalendarEvent, date: string): 'single' | 'start' | 'end' | null {
+  const endDate = event.endDate || event.startDate;
+  if (event.startDate === endDate) return date === event.startDate ? 'single' : null;
+  if (date === event.startDate) return 'start';
+  if (date === endDate) return 'end';
+  return null;
+}
+
+export function calendarEventColors(index: number) {
+  const hue = (210 + index * 137.508) % 360;
+  return { color: `hsl(${hue} 55% 34%)`, background: `hsl(${hue} 65% 95%)`, border: `hsl(${hue} 45% 75%)` };
+}
+
 export function eventsForMonth(events: CalendarEvent[], month: string): CalendarEvent[] {
   const [year, number] = month.split('-').map(Number);
   const lastDay = new Date(Date.UTC(year, number, 0)).getUTCDate();
   const firstDate = `${month}-01`;
   const lastDate = `${month}-${lastDay}`;
-  return events.filter((event) => event.startDate <= lastDate && lastOccupiedDate(event) >= firstDate);
+  // The ending date remains visible as a boundary, including an end at midnight.
+  return events.filter((event) => event.startDate <= lastDate && (event.endDate || event.startDate) >= firstDate);
 }
 
 const dateFormatter = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short', timeZone: 'Asia/Seoul' });

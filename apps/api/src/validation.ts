@@ -118,7 +118,8 @@ export const siteInfoInput = z.object({
   address: bounded(500),
   mapUrl: urlSchema,
   recurringInfo: recurringInfoInput.optional(),
-  churchEvents: z.array(z.object({ title: required(120), date: dateSchema, content: bounded(1000).default(''), contact: bounded(200).default('') })).max(100).optional(),
+  churchEvents: z.array(z.object({ title: required(120), date: dateSchema, endDate: dateSchema.or(z.literal('')).optional(), content: bounded(1000).default(''), contact: bounded(200).default('') })
+    .refine((event) => !event.endDate || event.endDate >= event.date, { path: ['endDate'], message: '종료 날짜는 시작 날짜 이후로 설정해 주세요.' })).max(100).optional(),
 });
 
 export type BulletinInput = z.infer<typeof bulletinInput>;

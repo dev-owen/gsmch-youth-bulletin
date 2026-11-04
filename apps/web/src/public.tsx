@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, CalendarDays, ChevronRight, MapPin, Megaphone, Sparkles, WifiOff } from 'lucide-react';
 import { api, coverUrl, formatDate, readLatest, saveLatest, shortDate, type Bulletin, type CalendarEvent, type Promotion, type PublicData } from './lib';
 import { ChurchGuide } from './church-guide';
 import { BulletinQr } from './bulletin-qr';
-import { collectCalendarEvents, eventOccursOnDate, eventsForMonth, formatSchedule } from './calendar';
+import { calendarEventColors, collectCalendarEvents, eventMarkerOnDate, eventsForMonth, formatSchedule } from './calendar';
 import './promotion-schedule.css';
+import './church-calendar.css';
 import { CommunityNewsContent } from './community-news-content';
 import { ReadingSettings } from './reading-settings';
 import { BulletinBody, CompactDisclosure, useCompactBulletin } from './compact-disclosure';
@@ -103,17 +104,33 @@ function ChurchCalendar({ events, initialDate }: { events: CalendarEvent[]; init
   const days = new Date(Date.UTC(year, number, 0)).getUTCDate();
   const monthKey = `${year}-${String(number).padStart(2, '0')}`;
   const monthEvents = eventsForMonth(events, monthKey);
+  const eventStyles = new Map(events.map((event, index) => {
+    const colors = calendarEventColors(index);
+    return [event, { '--event-color': colors.color, '--event-background': colors.background, '--event-border': colors.border } as CSSProperties];
+  }));
+  const weeks = Array.from({ length: Math.ceil((firstWeekday + days) / 7) }, (_, week) =>
+    Array.from({ length: 7 }, (_, weekday) => { const day = week * 7 + weekday - firstWeekday + 1; return day > 0 && day <= days ? day : null; }));
   return <section id="calendar" className="content-section church-calendar"><SectionHeading number="05" kicker="CHURCH CALENDAR" title="교회 주요 일정" icon={<CalendarDays size={23} />} />
     <CompactDisclosure title="교회 일정" preview={`${year}년 ${number}월 · ${monthEvents.length ? `${monthEvents.length}개의 일정` : '등록된 일정 없음'}`} icon={<CalendarDays size={20} />} level={2}>
     <div className="calendar-month"><button className="calendar-nav" aria-label="이전 달" onClick={() => setMonth(new Date(Date.UTC(year, number - 2, 1)))}><ArrowLeft size={18} /></button><strong>{year}년 {number}월</strong><button className="calendar-nav" aria-label="다음 달" onClick={() => setMonth(new Date(Date.UTC(year, number, 1)))}><ArrowRight size={18} /></button></div>
-    <div className="calendar-grid" role="grid" aria-label={`${year}년 ${number}월 일정`}>
-      {['일', '월', '화', '수', '목', '금', '토'].map((day) => <span role="columnheader" className="calendar-weekday" key={day}>{day}</span>)}
-      {Array.from({ length: firstWeekday }, (_, i) => <span className="calendar-empty" role="gridcell" key={`empty-${i}`} />)}
-      {Array.from({ length: days }, (_, i) => { const day = i + 1; const date = `${monthKey}-${String(day).padStart(2, '0')}`; const dayEvents = monthEvents.filter((event) => eventOccursOnDate(event, date)); const hasEvent = dayEvents.length > 0; return <span role="gridcell" aria-label={`${day}일${hasEvent ? `, ${dayEvents.map((event) => event.title).join(', ')}` : ''}`} className={`calendar-day${hasEvent ? ' has-event' : ''}`} key={date}>{day}{hasEvent && <i />}</span>; })}
-    </div>
+    <table className="calendar-table" aria-label={`${year}년 ${number}월 일정`}>
+      <thead><tr>{['일', '월', '화', '수', '목', '금', '토'].map((day) => <th scope="col" key={day}><span className="calendar-weekday">{day}</span></th>)}</tr></thead>
+      <tbody>{weeks.map((week, weekIndex) => <tr key={weekIndex}>{week.map((day, weekday) => {
+        if (day === null) return <td key={weekday} />;
+        const date = `${monthKey}-${String(day).padStart(2, '0')}`;
+        const markers = monthEvents.flatMap((event) => { const kind = eventMarkerOnDate(event, date); return kind ? [{ event, kind }] : []; });
+        return <td key={weekday}><div className={`calendar-day${markers.length ? ' has-event' : ''}`}><time dateTime={date}>{day}</time><div className="calendar-markers">{markers.map(({ event, kind }, index) => {
+          const label = `${event.title}${kind === 'start' ? ' 시작' : kind === 'end' ? ' 종료' : ''}`;
+          return <span className={`calendar-marker ${kind === 'single' ? 'calendar-dot' : 'calendar-boundary'}`} style={eventStyles.get(event)} role="img" aria-label={label} title={label} key={index}>{kind !== 'single' && (kind === 'start' ? '시작' : '종료')}</span>;
+        })}</div></div></td>;
+      })}</tr>)}</tbody>
+    </table>
+    <p className="calendar-marker-help">일정별 색상으로 구분합니다. 기간 일정은 시작·종료일만 표시합니다.</p>
     <div className="calendar-events" aria-live="polite"><h3>{number}월 일정</h3>{monthEvents.length ? monthEvents.map((event, i) => {
-      const visibleDate = event.startDate < `${monthKey}-01` ? `${monthKey}-01` : event.startDate;
-      return <article className="calendar-event" key={`${event.startDate}-${event.title}-${i}`}><time dateTime={visibleDate}><strong>{Number(visibleDate.slice(8))}</strong><span>{new Date(`${visibleDate}T12:00:00+09:00`).toLocaleDateString('ko-KR', { weekday: 'short', timeZone: 'Asia/Seoul' })}</span></time><div>{event.sourceTitle && event.sourceTitle !== event.title && <small className="calendar-source">{event.sourceTitle}</small>}<h4>{event.title}</h4><p className="calendar-event-schedule">{formatSchedule(event)}</p>{event.content && <p>{event.content}</p>}{event.contact && <a href={`tel:${event.contact.replace(/[^+\d]/g, '')}`}>문의 {event.contact}</a>}{event.url && <PromotionLink url={event.url} label={event.linkLabel} />}</div></article>;
+      const endDate = event.endDate || event.startDate;
+      const isRange = endDate !== event.startDate;
+      const rangeDate = (date: string) => `${Number(date.slice(5, 7))}.${Number(date.slice(8))}`;
+      return <article className="calendar-event calendar-colored-event" style={eventStyles.get(event)} key={`${event.startDate}-${event.title}-${i}`}><div className={`calendar-event-date${isRange ? ' is-range' : ''}`}>{isRange ? <><time dateTime={event.startDate}>{rangeDate(event.startDate)}</time><span aria-label="부터">~</span><time dateTime={endDate}>{rangeDate(endDate)}</time></> : <time dateTime={event.startDate}><strong>{Number(event.startDate.slice(8))}</strong><span>{new Date(`${event.startDate}T12:00:00+09:00`).toLocaleDateString('ko-KR', { weekday: 'short', timeZone: 'Asia/Seoul' })}</span></time>}</div><div>{event.sourceTitle && event.sourceTitle !== event.title && <small className="calendar-source">{event.sourceTitle}</small>}<h4><span className="calendar-event-color" aria-hidden="true" />{event.title}</h4><p className="calendar-event-schedule">{formatSchedule(event)}</p>{event.content && <p>{event.content}</p>}{event.contact && <a href={`tel:${event.contact.replace(/[^+\d]/g, '')}`}>문의 {event.contact}</a>}{event.url && <PromotionLink url={event.url} label={event.linkLabel} />}</div></article>;
     }) : <p className="calendar-empty-note">이번 달 등록된 일정이 없습니다.</p>}</div>
     </CompactDisclosure>
   </section>;
