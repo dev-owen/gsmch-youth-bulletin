@@ -1,0 +1,14 @@
+.promotion-editor-card,.promotion-editor-card .field,.promotion-editor-card input,.promotion-editor-card select,.promotion-editor-card textarea{min-width:0}
+.promotion-add-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.promotion-add-actions .add-button{min-width:0;white-space:normal}
+.schedule-fields{min-width:0;margin:0 0 14px;padding:14px;border:1px solid #d8e4ed;border-radius:5px;background:#f1f6fa}
+.schedule-fields legend{display:flex;align-items:center;gap:7px;padding:0 6px;font-size:.8125rem;font-weight:700;color:#4c708e}
+.schedule-all-day{display:flex;align-items:center;gap:8px;margin:0 0 15px;font-size:.875rem;color:#485f72}
+.schedule-all-day input{width:18px;height:18px;accent-color:#315f80}
+.schedule-help{margin:0;color:#718596;font-size:.75rem;line-height:1.7}
+.promotion-detail .promotion-schedule{display:flex;align-items:flex-start;gap:7px;color:#527a99}
+.promotion-schedule svg{flex-shrink:0;margin-top:4px}
+.calendar-event .calendar-event-schedule{color:#527a99;font-size:.8125rem;font-weight:600}
+.calendar-source{display:block;margin-bottom:5px;color:#8293a2;font-size:.75rem}
+.calendar-event>div{overflow-wrap:anywhere}
+@media(max-width:500px){.promotion-add-actions{grid-template-columns:1fr;gap:0}.schedule-fields{padding:12px}.calendar-event{gap:12px}}

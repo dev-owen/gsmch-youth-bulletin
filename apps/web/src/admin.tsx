@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, CalendarDays, Check, ChevronRight, Eye, ImagePlus, LogOut, Plus, Save, Settings2, Trash2, UploadCloud, X } from 'lucide-react';
-import { api, authClient, coverUrl, json, shortDate, type Bulletin, type BulletinInput, type BulletinListItem, type ChurchEvent, type SiteInfo } from './lib';
+import { api, authClient, coverUrl, json, shortDate, type Bulletin, type BulletinInput, type BulletinListItem, type CalendarEvent, type ChurchEvent, type SiteInfo } from './lib';
 import { BulletinContent } from './public';
 import { normalizeSiteInfo } from './church-info';
 import { RecurringInfoEditor } from './church-info-editor';
 import { optimizeImage } from './media';
+import { PromotionEditor } from './promotion-editor';
 import { CommunityNewsEditor } from './community-news-editor';
 
 type AdminStatus = 'checking' | 'ready' | 'login' | 'forbidden' | 'error';
@@ -68,6 +69,7 @@ function BulletinIndex() {
 function BulletinEditor({ id }: { id: string }) {
   const [bulletin, setBulletin] = useState<Bulletin | null>(null);
   const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [form, setForm] = useState<BulletinInput | null>(null);
   const [dirty, setDirty] = useState(false);
   const [preview, setPreview] = useState(false);
@@ -76,16 +78,13 @@ function BulletinEditor({ id }: { id: string }) {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   useEffect(() => {
-    Promise.all([api<{ bulletin: Bulletin }>(`/v1/admin/bulletins/${id}`), api<{ siteInfo: SiteInfo }>('/v1/admin/site-info')]).then(([b, s]) => {
-      setBulletin(b.bulletin); setSiteInfo(s.siteInfo); setForm(toInput(b.bulletin));
+    Promise.all([api<{ bulletin: Bulletin; calendarEvents?: CalendarEvent[] }>(`/v1/admin/bulletins/${id}`), api<{ siteInfo: SiteInfo }>('/v1/admin/site-info')]).then(([b, s]) => {
+      setBulletin(b.bulletin); setSiteInfo(s.siteInfo); setCalendarEvents(b.calendarEvents || []); setForm(toInput(b.bulletin));
     }).catch((e) => setError(e.message));
   }, [id]);
   function update(change: Partial<BulletinInput>) { setForm((value) => value ? { ...value, ...change } : null); setDirty(true); setNotice(''); }
   function itemChange(index: number, key: 'label' | 'content' | 'assignee', value: string) {
     if (!form) return; const copy = [...form.worshipItems]; copy[index] = { ...copy[index], [key]: value }; update({ worshipItems: copy });
-  }
-  function promotionChange(index: number, key: 'title' | 'body' | 'url', value: string) {
-    if (!form) return; const copy = [...form.promotions]; copy[index] = { ...copy[index], [key]: value }; update({ promotions: copy });
   }
   async function save() {
     if (!form) return false;
@@ -127,9 +126,9 @@ function BulletinEditor({ id }: { id: string }) {
     <section className="editor-card"><div className="editor-card-head"><span className="editor-card-number">02</span><div><h2>예배 순서</h2><p>순서명, 내용, 담당자를 입력해 주세요.</p></div></div><div className="editable-list">{form.worshipItems.map((item, index) => <div className="editable-row worship-editor-row" key={index}><span className="row-index">{String(index + 1).padStart(2, '0')}</span><input aria-label={`${index + 1}번째 순서명`} value={item.label} onChange={(e) => itemChange(index, 'label', e.target.value)} placeholder="순서명" /><input aria-label={`${index + 1}번째 내용`} value={item.content} onChange={(e) => itemChange(index, 'content', e.target.value)} placeholder="내용 (선택)" /><input aria-label={`${index + 1}번째 담당자`} value={item.assignee} onChange={(e) => itemChange(index, 'assignee', e.target.value)} placeholder="담당자" /><div className="row-actions"><button aria-label="위로" disabled={index === 0} onClick={() => update({ worshipItems: move(form.worshipItems, index, index - 1) })}><ArrowUp size={15} /></button><button aria-label="아래로" disabled={index === form.worshipItems.length - 1} onClick={() => update({ worshipItems: move(form.worshipItems, index, index + 1) })}><ArrowDown size={15} /></button><button aria-label="삭제" onClick={() => update({ worshipItems: form.worshipItems.filter((_, i) => i !== index) })}><Trash2 size={15} /></button></div></div>)}</div><button className="add-button" disabled={form.worshipItems.length >= 30} onClick={() => update({ worshipItems: [...form.worshipItems, { label: '', content: '', assignee: '' }] })}><Plus size={16} /> 순서 추가</button></section>
     <section className="editor-card"><div className="editor-card-head"><span className="editor-card-number">03</span><div><h2>설교</h2><p>오늘의 말씀을 소개합니다.</p></div></div><label className="field">설교 제목<input value={form.sermonTitle} onChange={(e) => update({ sermonTitle: e.target.value })} placeholder="설교 제목" /></label><div className="field-grid"><label className="field">성경 본문<input value={form.scripture} onChange={(e) => update({ scripture: e.target.value })} placeholder="예: 요한복음 15:1–8" /></label><label className="field">설교자<input value={form.preacher} onChange={(e) => update({ preacher: e.target.value })} placeholder="설교자 이름" /></label></div></section>
     <CommunityNewsEditor value={form.communityNews} onChange={(communityNews) => update({ communityNews })} />
-    <section className="editor-card"><div className="editor-card-head"><span className="editor-card-number">05</span><div><h2>광고</h2><p>제목과 설명, 여러 개의 세부 내용을 등록할 수 있습니다.</p></div></div>{form.promotions.map((promo, index) => <div className="promo-editor" key={index}><div className="promo-editor-head"><strong>광고 {index + 1}</strong><button className="icon-button" aria-label="광고 삭제" onClick={() => update({ promotions: form.promotions.filter((_, i) => i !== index) })}><Trash2 size={17} /></button></div><label className="field">제목<input value={promo.title} onChange={(e) => promotionChange(index, 'title', e.target.value)} placeholder="광고 제목" /></label><label className="field">설명<textarea value={promo.body} onChange={(e) => promotionChange(index, 'body', e.target.value)} rows={3} placeholder="광고 설명" /></label><div className="promotion-details"><strong>세부 내용</strong>{promo.details.map((detail, detailIndex) => <div className="promo-detail" key={detailIndex}><label className="field">제목<input value={detail.title} onChange={(e) => { const copy = [...promo.details]; copy[detailIndex] = { ...detail, title: e.target.value }; const promotions = [...form.promotions]; promotions[index] = { ...promo, details: copy }; update({ promotions }); }} placeholder="세부 제목" /></label><label className="field">본문<textarea rows={2} value={detail.body} onChange={(e) => { const copy = [...promo.details]; copy[detailIndex] = { ...detail, body: e.target.value }; const promotions = [...form.promotions]; promotions[index] = { ...promo, details: copy }; update({ promotions }); }} placeholder="세부 내용" /></label><button className="text-button" onClick={() => { const promotions = [...form.promotions]; promotions[index] = { ...promo, details: promo.details.filter((_, i) => i !== detailIndex) }; update({ promotions }); }}>세부 내용 삭제</button></div>)}<button className="add-button" disabled={promo.details.length >= 20} onClick={() => { const promotions = [...form.promotions]; promotions[index] = { ...promo, details: [...promo.details, { title: '', body: '' }] }; update({ promotions }); }}><Plus size={16} /> 세부 내용 추가</button></div><label className="field">링크 <small>선택</small><input type="url" value={promo.url} onChange={(e) => promotionChange(index, 'url', e.target.value)} placeholder="https://" /></label></div>)}<button className="add-button" disabled={form.promotions.length >= 10} onClick={() => update({ promotions: [...form.promotions, { title: '', body: '', details: [], url: '' }] })}><Plus size={16} /> 광고 추가</button></section>
+    <PromotionEditor value={form.promotions} serviceDate={form.serviceDate} onChange={(promotions) => update({ promotions })} />
     </div><aside className="editor-guide"><div className="guide-card"><span className="eyebrow dark">PUBLISHING GUIDE</span><h3>발행 전 확인</h3><ul><li>예배 날짜와 주제를 입력했나요?</li><li>모든 예배 순서에 담당자가 있나요?</li><li>설교 정보가 정확한가요?</li><li>광고 링크가 있다면 열리나요?</li></ul><p>저장만 하면 공개 주보는 바뀌지 않습니다. 발행 버튼을 누르면 같은 QR 주소에 새 주보가 표시됩니다.</p></div><button className="preview-aside" onClick={() => setPreview(true)}><Eye size={20} /><span><strong>모바일 미리보기</strong><small>실제 방문자 화면으로 확인</small></span><ChevronRight size={18} /></button></aside></div>
-    {preview && <div className="preview-overlay" role="dialog" aria-modal="true" aria-label="모바일 미리보기"><div className="preview-dialog"><div className="preview-toolbar"><strong>모바일 미리보기</strong><button className="icon-button" aria-label="닫기" onClick={() => setPreview(false)}><X size={21} /></button></div><div className="preview-device"><BulletinContent data={{ bulletin: previewBulletin, siteInfo }} preview /></div><div className="preview-footer"><button className="secondary-button" onClick={() => setPreview(false)}>편집으로 돌아가기</button></div></div></div>}
+    {preview && <div className="preview-overlay" role="dialog" aria-modal="true" aria-label="모바일 미리보기"><div className="preview-dialog"><div className="preview-toolbar"><strong>모바일 미리보기</strong><button className="icon-button" aria-label="닫기" onClick={() => setPreview(false)}><X size={21} /></button></div><div className="preview-device"><BulletinContent data={{ bulletin: previewBulletin, siteInfo, calendarEvents }} preview /></div><div className="preview-footer"><button className="secondary-button" onClick={() => setPreview(false)}>편집으로 돌아가기</button></div></div></div>}
   </div>;
 }
 

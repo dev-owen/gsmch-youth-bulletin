@@ -11,6 +11,36 @@ export const urlSchema = z.string().trim().max(2000).refine((value) => {
   try { return ['https:', 'http:'].includes(new URL(value).protocol); } catch { return false; }
 }, 'http 또는 https 주소를 입력해 주세요.');
 
+const optionalTime = z.string().refine((value) => !value || /^([01]\d|2[0-3]):[0-5]\d$/.test(value), '올바른 시각을 입력해 주세요.').default('');
+export const promotionScheduleInput = z.object({
+  startDate: dateSchema,
+  endDate: dateSchema.or(z.literal('')).default(''),
+  allDay: z.boolean().default(true),
+  startTime: optionalTime,
+  endTime: optionalTime,
+}).superRefine((schedule, context) => {
+  const endDate = schedule.endDate || schedule.startDate;
+  if (endDate < schedule.startDate) context.addIssue({ code: 'custom', path: ['endDate'], message: '종료 날짜는 시작 날짜 이후로 설정해 주세요.' });
+  if (schedule.allDay) return;
+  if (!schedule.startTime) context.addIssue({ code: 'custom', path: ['startTime'], message: '시작 시각을 입력해 주세요.' });
+  if (endDate > schedule.startDate && !schedule.endTime) context.addIssue({ code: 'custom', path: ['endTime'], message: '여러 날에 걸친 일정의 종료 시각을 입력해 주세요.' });
+  if (schedule.endTime && endDate === schedule.startDate && schedule.endTime <= schedule.startTime) {
+    context.addIssue({ code: 'custom', path: ['endTime'], message: '종료 시각은 시작 시각 이후로 설정해 주세요.' });
+  }
+}).transform((schedule) => ({ ...schedule, endDate: schedule.endDate || schedule.startDate,
+  startTime: schedule.allDay ? '' : schedule.startTime, endTime: schedule.allDay ? '' : schedule.endTime }));
+
+const promotionDetailInput = z.object({
+  type: z.enum(['text', 'schedule']).optional(),
+  title: required(120),
+  body: bounded(1000).default(''),
+  schedule: promotionScheduleInput.optional(),
+}).superRefine((detail, context) => {
+  if (detail.type === 'schedule') {
+    if (!detail.schedule) context.addIssue({ code: 'custom', path: ['schedule'], message: '일정의 시작 날짜를 입력해 주세요.' });
+  } else if (!detail.body) context.addIssue({ code: 'custom', path: ['body'], message: '세부 내용을 입력해 주세요.' });
+});
+
 const communityPerson = z.object({ name: required(80), peer: required(40) });
 export const communityNewsInput = z.object({
   category: z.enum(['새가족', '등반', '결혼', '군입대']),
@@ -50,7 +80,7 @@ export const bulletinInput = z.object({
   preacher: bounded(100),
   worshipItems: z.array(z.object({ label: required(120), content: bounded(300).default(''), assignee: bounded(100) })).max(30),
   communityNews: z.array(communityNewsInput).max(30).default([]),
-  promotions: z.array(z.object({ title: required(120), body: required(1000), details: z.array(z.object({ title: required(120), body: required(1000) })).max(20).default([]), url: urlSchema })).max(10),
+  promotions: z.array(z.object({ title: required(120), body: required(1000), details: z.array(promotionDetailInput).max(20).default([]), url: urlSchema })).max(10),
 });
 
 const directoryGroups = z.array(z.object({ title: required(120), entries: z.array(required(500)).max(100) })).max(20);

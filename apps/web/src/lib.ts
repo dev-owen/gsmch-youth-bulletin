@@ -17,7 +17,10 @@ export type CommunityNews = {
   category: '새가족' | '등반' | '결혼' | '군입대'; content: string;
   people?: CommunityPerson[]; wedding?: CommunityWedding;
 };
-export type Promotion = { title: string; body: string; details: { title: string; body: string }[]; url: string };
+export type PromotionSchedule = { startDate: string; endDate: string; allDay: boolean; startTime: string; endTime: string };
+export type PromotionDetail = { type?: 'text' | 'schedule'; title: string; body: string; schedule?: PromotionSchedule };
+export type Promotion = { title: string; body: string; details: PromotionDetail[]; url: string };
+export type CalendarEvent = PromotionSchedule & { title: string; content: string; contact?: string; url?: string; sourceBulletinId?: string; sourceTitle?: string };
 export type Bulletin = {
   id: string; serviceDate: string; theme: string; coverMediaId: string | null;
   cover: { objectKey: string; altText: string } | null;
@@ -27,7 +30,7 @@ export type Bulletin = {
 };
 export type BulletinInput = Pick<Bulletin, 'serviceDate' | 'theme' | 'coverMediaId' | 'sermonTitle' | 'scripture' | 'preacher' | 'worshipItems' | 'communityNews' | 'promotions'> & { coverAltText: string };
 export type BulletinListItem = Pick<Bulletin, 'id' | 'serviceDate' | 'theme' | 'status'>;
-export type PublicData = { bulletin: Bulletin | null; siteInfo: SiteInfo };
+export type PublicData = { bulletin: Bulletin | null; siteInfo: SiteInfo; calendarEvents?: CalendarEvent[] };
 
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message); }

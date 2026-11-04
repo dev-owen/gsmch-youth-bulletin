@@ -3,7 +3,7 @@ import { cors } from 'hono/cors';
 import { Pool } from 'pg';
 import { ZodError } from 'zod';
 import { createAuth } from './auth';
-import { getBulletin, getSiteInfo, replaceBulletin, transaction } from './db';
+import { getBulletin, getPromotionCalendarEvents, getSiteInfo, replaceBulletin, transaction } from './db';
 import { readImage } from './media';
 import type { AppEnv } from './types';
 import { bulletinInput, dateSchema, siteInfoInput } from './validation';
@@ -43,13 +43,14 @@ app.use('/v1/admin/*', async (c, next) => {
 
 app.get('/v1/bulletins/current', async (c) => {
   const pool = c.get('pool');
-  const [current, siteInfo] = await Promise.all([
+  const [current, siteInfo, calendarEvents] = await Promise.all([
     pool.query<{ current_bulletin_id: string | null }>('SELECT current_bulletin_id FROM site_settings WHERE id = 1'),
     getSiteInfo(pool),
+    getPromotionCalendarEvents(pool),
   ]);
   const id = current.rows[0]?.current_bulletin_id;
   const bulletin = id ? await getBulletin(pool, "b.id = $1 AND b.status = 'published'", id) : null;
-  return c.json({ bulletin, siteInfo }, 200, noStore);
+  return c.json({ bulletin, siteInfo, calendarEvents }, 200, noStore);
 });
 
 app.get('/v1/bulletins', async (c) => {
@@ -74,7 +75,8 @@ app.get('/v1/bulletins/:date', async (c) => {
   if (!dateSchema.safeParse(date).success) return fail('INVALID_DATE', '날짜가 올바르지 않습니다.', 400);
   const bulletin = await getBulletin(c.get('pool'), "b.service_date = $1 AND b.status = 'published'", date);
   if (!bulletin) return fail('NOT_FOUND', '해당 날짜의 주보가 없습니다.', 404);
-  return c.json({ bulletin, siteInfo: await getSiteInfo(c.get('pool')) }, 200, noStore);
+  const [siteInfo, calendarEvents] = await Promise.all([getSiteInfo(c.get('pool')), getPromotionCalendarEvents(c.get('pool'))]);
+  return c.json({ bulletin, siteInfo, calendarEvents }, 200, noStore);
 });
 
 app.get('/v1/admin/me', (c) => c.json({ userId: c.get('adminUserId') }, 200, noStore));
@@ -89,7 +91,7 @@ app.get('/v1/admin/bulletins', async (c) => {
 app.get('/v1/admin/bulletins/:id', async (c) => {
   const bulletin = await getBulletin(c.get('pool'), 'b.id = $1', c.req.param('id'));
   if (!bulletin) return fail('NOT_FOUND', '주보를 찾을 수 없습니다.', 404);
-  return c.json({ bulletin }, 200, noStore);
+  return c.json({ bulletin, calendarEvents: await getPromotionCalendarEvents(c.get('pool')) }, 200, noStore);
 });
 
 app.post('/v1/admin/bulletins', async (c) => {
