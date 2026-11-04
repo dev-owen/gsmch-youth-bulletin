@@ -1,9 +1,11 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
-import { Minus, Plus, Settings2, X } from 'lucide-react';
+import { Minus, Moon, Plus, Settings2, X } from 'lucide-react';
 import './reading-settings.css';
 import { useLanguage } from './language';
 
 const STORAGE_KEY = 'gsmch-reading-text-size-v1';
+const THEME_KEY = 'gsmch-reading-theme-v1';
+type ReadingTheme = 'light' | 'dark';
 const MIN_SIZE = 80;
 const MAX_SIZE = 200;
 const STEP = 10;
@@ -17,14 +19,62 @@ function readTextSize() {
   }
 }
 
+function readThemePreference(): ReadingTheme | null {
+  try {
+    const value = localStorage.getItem(THEME_KEY);
+    return value === 'light' || value === 'dark' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 export function ReadingSettings() {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [textSize, setTextSize] = useState(readTextSize);
+  const [themePreference, setThemePreference] = useState(readThemePreference);
+  const [systemDark, setSystemDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const darkMode = themePreference ? themePreference === 'dark' : systemDark;
   const wrapperRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const nativeSizeRef = useRef<HTMLSpanElement>(null);
   const id = useId();
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const updateSystemTheme = () => setSystemDark(media.matches);
+    const updateStoredTheme = (event: StorageEvent) => {
+      if (event.key === THEME_KEY || event.key === null) setThemePreference(readThemePreference());
+    };
+    updateSystemTheme();
+    media.addEventListener('change', updateSystemTheme);
+    window.addEventListener('storage', updateStoredTheme);
+    return () => {
+      media.removeEventListener('change', updateSystemTheme);
+      window.removeEventListener('storage', updateStoredTheme);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const previousTheme = root.getAttribute('data-reading-theme');
+    const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const previousColor = themeColor?.getAttribute('content') ?? null;
+    root.dataset.readingTheme = darkMode ? 'dark' : 'light';
+    themeColor?.setAttribute('content', darkMode ? '#0f1720' : '#f5f8fb');
+    return () => {
+      if (previousTheme === null) root.removeAttribute('data-reading-theme');
+      else root.setAttribute('data-reading-theme', previousTheme);
+      if (previousColor === null) themeColor?.removeAttribute('content');
+      else themeColor?.setAttribute('content', previousColor);
+    };
+  }, [darkMode]);
+
+  useEffect(() => {
+    if (themePreference === null) return;
+    try { localStorage.setItem(THEME_KEY, themePreference); }
+    catch { /* Theme switching still works when device storage is unavailable. */ }
+  }, [themePreference]);
 
   useLayoutEffect(() => {
     const probe = nativeSizeRef.current;
@@ -105,7 +155,13 @@ export function ReadingSettings() {
         <button type="button" aria-label={t('글자 크게')} disabled={textSize === MAX_SIZE} onClick={() => setTextSize((value) => Math.min(MAX_SIZE, value + STEP))}><Plus size={22} aria-hidden="true" /></button>
       </div>
       <button type="button" className="reading-size-reset" disabled={textSize === 100} onClick={() => setTextSize(100)}>{t('기본 크기로')}</button>
-      <p className="reading-settings-help">{t('선택한 크기는 이 기기에 저장됩니다.')}</p>
+      <div className="reading-theme-setting">
+        <button type="button" className="reading-theme-toggle" role="switch" aria-label={t('다크 모드')} aria-checked={darkMode} onClick={() => setThemePreference(darkMode ? 'light' : 'dark')}>
+          <span className="reading-theme-label"><Moon size={18} aria-hidden="true" /><span>{t('다크 모드')}</span></span>
+          <span className="reading-theme-control"><span className="reading-theme-status" aria-hidden="true">{t(darkMode ? '켜짐' : '꺼짐')}</span><span className="reading-theme-track" aria-hidden="true"><span /></span></span>
+        </button>
+      </div>
+      <p className="reading-settings-help">{t('선택한 설정은 이 기기에 저장됩니다.')}</p>
     </section>}
   </div>;
 }
