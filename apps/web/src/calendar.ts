@@ -62,12 +62,13 @@ export function eventsForMonth(events: CalendarEvent[], month: string): Calendar
   return events.filter((event) => event.startDate <= lastDate && (event.endDate || event.startDate) >= firstDate);
 }
 
-const dateFormatter = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short', timeZone: 'Asia/Seoul' });
-export function formatSchedule(schedule: PromotionSchedule): string {
+export function formatSchedule(schedule: PromotionSchedule, locale = 'ko-KR'): string {
   if (!schedule.startDate) return '';
+  const dateFormatter = new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short', timeZone: 'Asia/Seoul' });
+  const allDay = locale.startsWith('en') ? 'All day' : locale.startsWith('zh') ? '全天' : '종일';
   const label = (date: string) => dateFormatter.format(new Date(`${date}T12:00:00+09:00`));
   const endDate = schedule.endDate || schedule.startDate;
-  if (schedule.allDay) return `${label(schedule.startDate)}${endDate !== schedule.startDate ? ` ~ ${label(endDate)}` : ''} · 종일`;
+  if (schedule.allDay) return `${label(schedule.startDate)}${endDate !== schedule.startDate ? ` ~ ${label(endDate)}` : ''} · ${allDay}`;
   if (endDate !== schedule.startDate) return `${label(schedule.startDate)} ${schedule.startTime} ~ ${label(endDate)} ${schedule.endTime}`;
   return `${label(schedule.startDate)} ${schedule.startTime}${schedule.endTime ? ` ~ ${schedule.endTime}` : ''}`;
 }

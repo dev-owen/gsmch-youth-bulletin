@@ -53,8 +53,8 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
 }
 export const json = (data: unknown, method = 'PUT'): RequestInit => ({ method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
 export const coverUrl = (bulletin: Bulletin) => bulletin.cover ? `${MEDIA_BASE}/${bulletin.cover.objectKey}` : null;
-export const formatDate = (date: string) => new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', timeZone: 'Asia/Seoul' }).format(new Date(`${date}T12:00:00+09:00`));
-export const shortDate = (date: string) => new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Seoul' }).format(new Date(`${date}T12:00:00+09:00`));
+export const formatDate = (date: string, locale = 'ko-KR') => new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', timeZone: 'Asia/Seoul' }).format(new Date(`${date}T12:00:00+09:00`));
+export const shortDate = (date: string, locale = 'ko-KR') => new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Seoul' }).format(new Date(`${date}T12:00:00+09:00`));
 
 const STORAGE_KEY = 'gsmch-latest-bulletin-v1';
 export function saveLatest(data: PublicData) {

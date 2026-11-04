@@ -1,0 +1,8 @@
+.language-selector{position:relative;display:inline-flex;align-items:center;flex-shrink:0;color:#526a7e}
+.language-selector>svg:first-child{position:absolute;left:11px;pointer-events:none}
+.language-selector select{appearance:none;min-height:44px;max-width:100%;padding:10px 27px 10px 36px;border:1px solid #d6e2eb;border-radius:8px;background:#fff;color:inherit;font:inherit;font-size:.8125rem;font-weight:700;cursor:pointer}
+.language-selector select:hover{background:#eaf2f7;border-color:#a6bed0;color:#315f84}
+.language-selector select:focus-visible{outline:2px solid #527b9d;outline-offset:3px}
+.language-chevron{position:absolute;right:9px;pointer-events:none}
+.header-actions{flex-wrap:wrap;min-width:0}
+@media(max-width:600px){.site-header-inner .brand{flex-basis:100%}.header-actions{width:100%;justify-content:flex-end}.header-actions .header-link{margin-inline-end:auto}}

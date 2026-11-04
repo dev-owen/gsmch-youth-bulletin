@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { PublicPage, ArchivePage } from './public';
 import { AdminPage } from './admin';
+import { PublicLanguageLayout } from './language';
 import './styles.css';
 import './bulletin-layout.css';
 
@@ -24,11 +25,13 @@ function ToastViewport() {
 
 function App() {
   return <BrowserRouter><Routes>
-    <Route path="/" element={<PublicPage />} />
-    <Route path="/bulletins/:date" element={<PublicPage />} />
-    <Route path="/archive" element={<ArchivePage />} />
+    <Route element={<PublicLanguageLayout />}>
+      <Route path="/" element={<PublicPage />} />
+      <Route path="/bulletins/:date" element={<PublicPage />} />
+      <Route path="/archive" element={<ArchivePage />} />
+      <Route path="*" element={<PublicPage invalidRoute />} />
+    </Route>
     <Route path="/admin/*" element={<AdminPage />} />
-    <Route path="*" element={<PublicPage invalidRoute />} />
   </Routes><ToastViewport /></BrowserRouter>;
 }
 

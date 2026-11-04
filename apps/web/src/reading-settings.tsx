@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { Minus, Plus, Settings2, X } from 'lucide-react';
 import './reading-settings.css';
+import { useLanguage } from './language';
 
 const STORAGE_KEY = 'gsmch-reading-text-size-v1';
 const MIN_SIZE = 80;
@@ -17,6 +18,7 @@ function readTextSize() {
 }
 
 export function ReadingSettings() {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [textSize, setTextSize] = useState(readTextSize);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -91,19 +93,19 @@ export function ReadingSettings() {
 
   return <div className="reading-settings" ref={wrapperRef}>
     <span className="reading-native-size" ref={nativeSizeRef} aria-hidden="true">A</span>
-    <button ref={triggerRef} type="button" className="reading-settings-trigger" aria-label="읽기 설정" title="읽기 설정" aria-expanded={open} aria-controls={id} onClick={() => setOpen((value) => !value)}>
-      <Settings2 size={19} aria-hidden="true" /><span>설정</span>
+    <button ref={triggerRef} type="button" className="reading-settings-trigger" aria-label={t('읽기 설정')} title={t('읽기 설정')} aria-expanded={open} aria-controls={id} onClick={() => setOpen((value) => !value)}>
+      <Settings2 size={19} aria-hidden="true" /><span>{t('설정')}</span>
     </button>
     {open && <section className="reading-settings-panel" id={id} aria-labelledby={`${id}-title`}>
-      <div className="reading-settings-heading"><h2 id={`${id}-title`}>읽기 설정</h2><button type="button" className="reading-settings-close" aria-label="읽기 설정 닫기" onClick={close}><X size={19} aria-hidden="true" /></button></div>
-      <p className="reading-settings-label">글자 크기</p>
-      <div className="reading-size-controls" role="group" aria-label="글자 크기 조절">
-        <button type="button" aria-label="글자 작게" disabled={textSize === MIN_SIZE} onClick={() => setTextSize((value) => Math.max(MIN_SIZE, value - STEP))}><Minus size={22} aria-hidden="true" /></button>
-        <output aria-label="글자 크기" aria-live="polite" aria-atomic="true">{textSize}%</output>
-        <button type="button" aria-label="글자 크게" disabled={textSize === MAX_SIZE} onClick={() => setTextSize((value) => Math.min(MAX_SIZE, value + STEP))}><Plus size={22} aria-hidden="true" /></button>
+      <div className="reading-settings-heading"><h2 id={`${id}-title`}>{t('읽기 설정')}</h2><button type="button" className="reading-settings-close" aria-label={t('읽기 설정 닫기')} onClick={close}><X size={19} aria-hidden="true" /></button></div>
+      <p className="reading-settings-label">{t('글자 크기')}</p>
+      <div className="reading-size-controls" role="group" aria-label={t('글자 크기 조절')}>
+        <button type="button" aria-label={t('글자 작게')} disabled={textSize === MIN_SIZE} onClick={() => setTextSize((value) => Math.max(MIN_SIZE, value - STEP))}><Minus size={22} aria-hidden="true" /></button>
+        <output aria-label={t('글자 크기')} aria-live="polite" aria-atomic="true">{textSize}%</output>
+        <button type="button" aria-label={t('글자 크게')} disabled={textSize === MAX_SIZE} onClick={() => setTextSize((value) => Math.min(MAX_SIZE, value + STEP))}><Plus size={22} aria-hidden="true" /></button>
       </div>
-      <button type="button" className="reading-size-reset" disabled={textSize === 100} onClick={() => setTextSize(100)}>기본 크기로</button>
-      <p className="reading-settings-help">선택한 크기는 이 기기에 저장됩니다.</p>
+      <button type="button" className="reading-size-reset" disabled={textSize === 100} onClick={() => setTextSize(100)}>{t('기본 크기로')}</button>
+      <p className="reading-settings-help">{t('선택한 크기는 이 기기에 저장됩니다.')}</p>
     </section>}
   </div>;
 }

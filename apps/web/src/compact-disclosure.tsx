@@ -1,5 +1,6 @@
 import { Children, createContext, useContext, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react';
+import { useLanguage } from './language';
 
 const CompactContext = createContext(false);
 export const useCompactBulletin = () => useContext(CompactContext);
@@ -38,6 +39,7 @@ export function CompactDisclosure({ title, preview, meta, icon, level = 3, child
 }
 
 export function SwipeCards({ children, label }: { children: ReactNode; label: string }) {
+  const { t } = useLanguage();
   const compact = useCompactBulletin();
   const items = Children.toArray(children);
   const ref = useRef<HTMLDivElement>(null);
@@ -54,11 +56,11 @@ export function SwipeCards({ children, label }: { children: ReactNode; label: st
     if (!track || !slide) return;
     track.scrollTo({ left: track.scrollLeft + slide.getBoundingClientRect().left - track.getBoundingClientRect().left, behavior: window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 'instant' : 'smooth' });
   }
-  return <div className="swipe-cards" role={compact ? 'region' : undefined} aria-roledescription={compact ? '캐러셀' : undefined} aria-label={compact ? label : undefined}>
+  return <div className="swipe-cards" role={compact ? 'region' : undefined} aria-roledescription={compact ? t('캐러셀') : undefined} aria-label={compact ? label : undefined}>
     <div className="meeting-grid swipe-track" ref={ref} tabIndex={compact && items.length > 1 ? 0 : undefined} onScroll={updateActive} onKeyDown={event => {
       if (!compact || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
       event.preventDefault(); show(Math.max(0, Math.min(items.length - 1, active + (event.key === 'ArrowRight' ? 1 : -1))));
     }}>{items.map((item, index) => <div className="swipe-slide" key={index} role={compact ? 'group' : undefined} aria-label={compact ? `${index + 1} / ${items.length}` : undefined}>{item}</div>)}</div>
-    {compact && items.length > 1 && <div className="swipe-controls"><button type="button" aria-label={`이전 ${label}`} disabled={active === 0} onClick={() => show(active - 1)}><ArrowLeft size={17} aria-hidden="true" /></button><div className="swipe-pagination">{items.map((_, index) => <button type="button" key={index} aria-label={`${index + 1}번째 ${label} 보기`} aria-current={active === index ? 'true' : undefined} onClick={() => show(index)}><span /></button>)}</div><button type="button" aria-label={`다음 ${label}`} disabled={active === items.length - 1} onClick={() => show(active + 1)}><ArrowRight size={17} aria-hidden="true" /></button></div>}
+    {compact && items.length > 1 && <div className="swipe-controls"><button type="button" aria-label={t('이전 {label}', { label })} disabled={active === 0} onClick={() => show(active - 1)}><ArrowLeft size={17} aria-hidden="true" /></button><div className="swipe-pagination">{items.map((_, index) => <button type="button" key={index} aria-label={t('{index}번째 {label} 보기', { index: index + 1, label })} aria-current={active === index ? 'true' : undefined} onClick={() => show(index)}><span /></button>)}</div><button type="button" aria-label={t('다음 {label}', { label })} disabled={active === items.length - 1} onClick={() => show(active + 1)}><ArrowRight size={17} aria-hidden="true" /></button></div>}
   </div>;
 }
