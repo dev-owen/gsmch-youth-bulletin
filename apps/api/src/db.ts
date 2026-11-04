@@ -78,20 +78,20 @@ export async function replaceBulletin(client: PoolClient, id: string, data: Bull
   await client.query('DELETE FROM community_news WHERE bulletin_id = $1', [id]);
   if (data.worshipItems.length) await client.query(
     `INSERT INTO worship_items (bulletin_id, position, label, content, assignee)
-     SELECT $1, ordinality - 1, label, content, assignee
-     FROM jsonb_to_recordset($2::jsonb) WITH ORDINALITY AS x(label text, content text, assignee text, ordinality bigint)`,
+     SELECT $1, ordinality - 1, item->>'label', item->>'content', item->>'assignee'
+     FROM jsonb_array_elements($2::jsonb) WITH ORDINALITY AS x(item, ordinality)`,
     [id, JSON.stringify(data.worshipItems)]
   );
   if (data.communityNews.length) await client.query(
     `INSERT INTO community_news (bulletin_id, position, category, content, details)
-     SELECT $1, ordinality - 1, category, content, details
-     FROM jsonb_to_recordset($2::jsonb) WITH ORDINALITY AS x(category text, content text, details jsonb, ordinality bigint)`,
+     SELECT $1, ordinality - 1, item->>'category', item->>'content', item->'details'
+     FROM jsonb_array_elements($2::jsonb) WITH ORDINALITY AS x(item, ordinality)`,
     [id, JSON.stringify(data.communityNews.map(({ category, content, people, wedding, weddings }) => ({ category, content, details: { people, wedding, weddings } })))]
   );
   if (data.promotions.length) await client.query(
     `INSERT INTO promotions (bulletin_id, position, title, body, details, url)
-     SELECT $1, ordinality - 1, title, body, details, NULLIF(url, '')
-     FROM jsonb_to_recordset($2::jsonb) WITH ORDINALITY AS x(title text, body text, details jsonb, url text, ordinality bigint)`,
+     SELECT $1, ordinality - 1, item->>'title', item->>'body', item->'details', NULLIF(item->>'url', '')
+     FROM jsonb_array_elements($2::jsonb) WITH ORDINALITY AS x(item, ordinality)`,
     [id, JSON.stringify(data.promotions)]
   );
 }

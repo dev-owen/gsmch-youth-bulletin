@@ -60,7 +60,7 @@ test('schedule details survive the existing JSON storage and bulletin read path'
   const writes = [];
   await replaceBulletin({ query: async (sql, parameters) => { writes.push({ sql, parameters }); return { rows: [] }; } }, 'current', bulletinInput.parse(input));
   const inserted = writes.find(({ sql }) => sql.startsWith('INSERT INTO promotions'));
-  const storedDetails = JSON.parse(inserted.parameters[4]);
+  const storedDetails = JSON.parse(inserted.parameters[1])[0].details;
   assert.deepEqual(storedDetails, [detail]);
   const result = await getBulletin({ query: async (sql) => {
     if (sql.startsWith('SELECT b.id')) return { rows: [{ id: 'current', service_date: input.serviceDate, status: 'published' }] };
