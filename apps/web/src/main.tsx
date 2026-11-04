@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { PublicPage, ArchivePage } from './public';
 import { AdminPage } from './admin';
 import './styles.css';
+import './bulletin-layout.css';
 
 function App() {
   return <BrowserRouter><Routes>

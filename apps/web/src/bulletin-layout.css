@@ -1,0 +1,105 @@
+/* Compact spacing belongs to the bulletin, including its narrow admin preview. */
+body:has(.public-shell){min-width:0}
+.public-main{padding-top:24px}
+.cover{min-height:340px}
+.cover-content{padding:26px 36px;gap:18px}
+.cover-main{padding-block:8px}
+.cover-main h1{max-width:48rem;font-size:3rem;line-height:1.3;letter-spacing:-.055em;margin-bottom:12px;word-break:keep-all;text-wrap:balance}
+.cover-line{margin:12px 0 16px;width:32px}
+.cover-main p{font-size:.875rem;line-height:1.7}
+.cover-bottom{line-height:1.6}
+.reading-nav{max-width:none;padding:10px 0;gap:8px}
+.reading-nav a{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px}
+.bulletin-body{max-width:none;padding-top:28px;container-type:inline-size;display:grid;gap:40px;overflow-wrap:anywhere}
+.bulletin-overview,.bulletin-updates{display:grid;gap:32px;min-width:0}
+.bulletin-body .content-section{min-width:0;padding-top:0}
+.bulletin-body .section-heading{align-items:center;margin-bottom:18px;gap:12px}
+.bulletin-body .section-kicker{font-size:.625rem;letter-spacing:.12em;margin-bottom:7px}
+.bulletin-body .section-heading h2{font-size:1.5rem;line-height:1.4}
+.bulletin-body .section-icon{padding-bottom:0}
+.bulletin-body .worship-row{grid-template-columns:2rem minmax(0,1fr) minmax(4.5rem,.6fr);gap:12px;min-height:52px;padding:10px 0}
+.bulletin-body .worship-label{font-size:1rem;line-height:1.6}
+.bulletin-body .worship-assignee{font-size:.875rem;line-height:1.6;word-break:keep-all}
+.bulletin-body .worship-content{margin-top:3px;font-size:.8125rem;line-height:1.7}
+.bulletin-body .sermon-card{padding:26px 28px}
+.bulletin-body .sermon-scripture{margin-bottom:14px;line-height:1.7}
+.bulletin-body .sermon-card h3{font-size:1.625rem;line-height:1.5;margin-bottom:20px;word-break:keep-all}
+.bulletin-body .sermon-mark{top:16px;right:20px;font-size:4rem;pointer-events:none}
+.community-news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:10px}
+.community-news-grid .promotion-card{min-width:0;min-height:0;grid-template-columns:3rem minmax(0,1fr);align-items:start;gap:12px;padding:16px 18px}
+.community-news-grid .promotion-number{font-family:inherit;font-size:.875rem;font-weight:700;line-height:1.7;color:#527a99}
+.community-news-grid .promotion-card p{margin:0;line-height:1.7}
+.community-news-grid .community-people{gap:4px}
+.bulletin-body .promotion-list{gap:10px;align-items:start}
+.bulletin-body .announcement-card summary{grid-template-columns:1.75rem minmax(0,1fr) auto;min-height:72px;padding:17px 18px;gap:10px}
+.bulletin-body .announcement-card summary strong{font-size:1rem;line-height:1.6}
+.bulletin-body .announcement-card summary small{margin-top:3px;line-height:1.6}
+.bulletin-body .announcement-card .promotion-number{font-size:1.25rem}
+.bulletin-body .announcement-body{padding:0 18px 20px 56px}
+.bulletin-body .announcement-body>p{line-height:1.8}
+.bulletin-body .promotion-detail{padding:9px 0}
+.bulletin-body .calendar-month{padding:10px 0}
+.bulletin-body .calendar-nav{width:44px;height:44px}
+.bulletin-body .calendar-grid{padding:4px 0 10px}
+.bulletin-body .calendar-weekday,.bulletin-body .calendar-day,.bulletin-body .calendar-empty{min-height:2.375rem}
+.bulletin-body .calendar-events{margin-top:18px}
+.bulletin-body .calendar-event{padding:14px 0;gap:12px}
+.bulletin-body .calendar-event time{width:40px;flex-basis:40px}
+.bulletin-body .calendar-empty-note{padding:14px 0;margin-bottom:0;line-height:1.7}
+.bulletin-body .archive-cta{margin-top:0;padding:21px 24px}
+.bulletin-body .guide-nav{padding-bottom:16px;gap:6px}
+.bulletin-body .guide-nav a{display:inline-flex;align-items:center;padding:8px 12px}
+.bulletin-body .guide-section{padding-top:26px}
+.bulletin-body .guide-section-heading{margin-bottom:14px}
+.bulletin-body .newcomer-card{display:flex;padding:20px;gap:14px}
+.bulletin-body .newcomer-symbol{flex-basis:36px;width:36px;height:36px;margin:0}
+.bulletin-body .newcomer-card h4{margin:4px 0 8px}
+.bulletin-body .meeting-card{padding:18px}
+.bulletin-body .meeting-card h4{margin:8px 0 12px}
+.bulletin-body .meeting-schedule,.bulletin-body .meeting-location{margin-bottom:7px}
+.bulletin-body .guide-detail{margin-top:12px;padding-top:8px}
+.bulletin-body .guide-detail summary{min-height:44px}
+.bulletin-body .offering-card,.bulletin-body .vision-card{padding:22px}
+.bulletin-body .offering-instructions{gap:20px;margin-top:18px;padding-top:18px}
+.bulletin-body .vision-introduction{margin-bottom:18px}
+.bulletin-body .vision-points{gap:18px;margin-top:20px;padding-top:18px}
+.bulletin-body .directory-card>summary{min-height:54px;padding:14px 16px}
+.bulletin-body .church-visit{margin-top:24px;padding-top:20px;gap:20px}
+
+/* Use available content width, so text scaling and the editor preview reflow too. */
+@container(min-width:52rem){
+  .bulletin-overview{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);column-gap:36px;row-gap:28px;align-items:start}
+  .bulletin-overview .worship-section{grid-column:1;grid-row:1 / span 2}
+  .bulletin-overview .message-section,.bulletin-overview .community-section{grid-column:2}
+  .bulletin-updates:has(>#announcements){grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:36px;align-items:start}
+  .directory-grid:not(.staff-directory){grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+@media(max-width:760px){
+  .public-main{padding:14px 16px 48px}
+  .cover{min-height:300px}
+  .cover-content{padding:20px;gap:16px}
+  .cover-main h1{font-size:2rem;line-height:1.35}
+  .cover-main p{font-size:.8125rem}
+  .cover-top{gap:10px}
+  .cover-top .eyebrow{font-size:.5625rem;letter-spacing:.12em}
+  .cover-date{font-size:.875rem;line-height:1.7}
+  .reading-nav{padding:8px 0;gap:6px}
+  .reading-nav a{font-size:.75rem;padding:8px 12px}
+  .bulletin-body{padding:24px 0 0;gap:32px}
+  .bulletin-overview,.bulletin-updates{gap:28px}
+  .bulletin-body .section-heading{margin-bottom:16px}
+  .bulletin-body .section-heading h2{font-size:1.375rem}
+  .bulletin-body .worship-row{grid-template-columns:1.5rem minmax(0,1fr) minmax(4rem,.65fr);gap:8px}
+  .bulletin-body .sermon-card{padding:24px}
+  .bulletin-body .sermon-card h3{font-size:1.5rem}
+  .bulletin-body .announcement-body{padding-left:18px}
+  .community-news-grid .promotion-card{padding:14px 16px}
+  .site-footer{min-height:0;padding-block:24px}
+}
+
+/* The editor preview uses desktop viewport media queries inside a phone frame. */
+.preview-device .cover{min-height:300px}
+.preview-device .cover-content{padding:20px;gap:16px}
+.preview-device .cover-main h1{font-size:2rem}
+.preview-device .bulletin-body{padding-inline:0}
