@@ -25,12 +25,13 @@ export function CompactDisclosure({ title, preview, meta, icon, level = 3, child
 }) {
   const compact = useCompactBulletin();
   const [expanded, setExpanded] = useState(false);
+  const [interacted, setInteracted] = useState(false);
   const id = useId();
   const Heading = level === 2 ? 'h2' : 'h3';
   const visible = !compact || expanded;
-  return <div className={`compact-disclosure${expanded ? ' is-expanded' : ''} ${className}`}>
-    <Heading className="compact-heading" hidden={!compact}><button type="button" aria-label={title} aria-expanded={expanded} aria-controls={id} onClick={() => setExpanded(value => !value)}>
-      <span className="compact-icon" aria-hidden="true">{icon}</span><span className="compact-summary-text"><span className="compact-title">{title}</span>{preview && <span className="compact-preview">{preview}</span>}{meta && <span className="compact-meta">{meta}</span>}</span><ChevronDown className="compact-chevron" size={18} aria-hidden="true" />
+  return <div className={`compact-disclosure${expanded ? ' is-expanded' : ''}${interacted ? ' has-interacted' : ''} ${className}`}>
+    <Heading className="compact-heading" hidden={!compact}><button type="button" aria-label={title} aria-describedby={[preview && `${id}-preview`, meta && `${id}-meta`].filter(Boolean).join(' ') || undefined} aria-expanded={expanded} aria-controls={id} onClick={() => { setInteracted(true); setExpanded(value => !value); }}>
+      <span className="compact-icon" aria-hidden="true">{icon}</span><span className="compact-summary-text"><span className="compact-title">{title}</span>{preview && <span id={`${id}-preview`} className="compact-preview">{preview}</span>}{meta && <span id={`${id}-meta`} className="compact-meta">{meta}</span>}</span><ChevronDown className="compact-chevron" size={18} aria-hidden="true" />
     </button></Heading>
     <div id={id} className="compact-panel" aria-hidden={visible ? undefined : true} inert={!visible}><div className="compact-panel-inner"><div className="compact-panel-content">{children}</div></div></div>
   </div>;
