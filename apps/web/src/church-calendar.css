@@ -9,7 +9,7 @@
 .church-calendar .calendar-dot{width:7px;height:7px;border:0;border-radius:50%;background:var(--event-color)}
 .church-calendar .calendar-more{font-size:.6875rem;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;color:inherit}
 .church-calendar .calendar-marker-help{margin:9px 0 0;font-size:.75rem;line-height:1.7;color:#718596}
-.church-calendar .calendar-colored-event{border-left:3px solid var(--event-color);padding-left:10px}
+.church-calendar .calendar-event.calendar-colored-event{border-left:3px solid var(--event-color);padding-left:16px}
 .church-calendar .calendar-event-content{flex:1}
 .church-calendar .calendar-colored-event h4{display:flex;align-items:baseline;gap:7px}
 .church-calendar .calendar-event-color{display:inline-block;flex:0 0 7px;height:7px;border-radius:50%;background:var(--event-color)}
