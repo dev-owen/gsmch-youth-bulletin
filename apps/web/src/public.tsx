@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, CalendarDays, ChevronRight, MapPin, Megaphone, Sparkles, WifiOff } from 'lucide-react';
 import { api, coverUrl, formatDate, readLatest, saveLatest, shortDate, type Bulletin, type PublicData } from './lib';
 import { ChurchGuide } from './church-guide';
+import { CommunityNewsContent } from './community-news-content';
 
 const CHURCH = '선한목자 젊은이교회';
 
@@ -65,7 +66,7 @@ export function BulletinContent({ data, offline = false, preview = false }: { da
       <section id="message" className="content-section"><SectionHeading number="02" kicker="THE MESSAGE" title="오늘의 말씀" icon={<BookOpen size={23} />} />
         <div className="sermon-card"><span className="sermon-mark">“</span><p className="sermon-scripture">{bulletin.scripture}</p><h3>{bulletin.sermonTitle}</h3><div className="sermon-preacher"><span className="small-rule" />{bulletin.preacher}</div></div>
       </section>
-      {bulletin.communityNews?.length > 0 && <section id="news" className="content-section"><SectionHeading number="03" kicker="COMMUNITY NEWS" title="교우 소식" icon={<Sparkles size={23} />} /><div className="news-carousel" aria-label="교우 소식, 좌우로 밀어 보기">{bulletin.communityNews.map((news, index) => <article className="promotion-card" key={`${index}-${news.category}`}><span className="promotion-number">{news.category}</span><div><p>{news.content}</p></div></article>)}</div>{bulletin.communityNews.length > 1 && <p className="swipe-hint"><ArrowLeft size={14} /> 좌우로 밀어 소식을 살펴보세요 <ArrowRight size={14} /></p>}</section>}
+      {bulletin.communityNews?.length > 0 && <section id="news" className="content-section"><SectionHeading number="03" kicker="COMMUNITY NEWS" title="교우 소식" icon={<Sparkles size={23} />} /><div className="news-carousel" aria-label="교우 소식, 좌우로 밀어 보기">{bulletin.communityNews.map((news, index) => <article className="promotion-card" key={`${index}-${news.category}`}><span className="promotion-number">{news.category}</span><div><CommunityNewsContent news={news} /></div></article>)}</div>{bulletin.communityNews.length > 1 && <p className="swipe-hint"><ArrowLeft size={14} /> 좌우로 밀어 소식을 살펴보세요 <ArrowRight size={14} /></p>}</section>}
       {bulletin.promotions.length > 0 && <section id="announcements" className="content-section"><SectionHeading number="04" kicker="ANNOUNCEMENTS" title="광고" icon={<Megaphone size={23} />} />
         <div className="promotion-list">{bulletin.promotions.map((card, index) => <details className="promotion-card announcement-card" key={`${index}-${card.title}`} open={index === 0}><summary><span className="promotion-number">{String(index + 1).padStart(2, '0')}</span><span><strong>{card.title}</strong><small>눌러서 자세히 보기</small></span><ChevronRight className="announcement-chevron" size={19} /></summary><div className="announcement-body">{card.body && <p>{card.body}</p>}{card.details?.map((detail, detailIndex) => <div className="promotion-detail" key={detailIndex}><strong>{detail.title}</strong><p>{detail.body}</p></div>)}{card.url && <a href={card.url} target="_blank" rel="noreferrer" className="text-link">자세히 보기 <ArrowUpRight size={16} /></a>}</div></details>)}</div>
       </section>}

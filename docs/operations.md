@@ -32,6 +32,7 @@ psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/schema.sql
 
 ```sh
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/migrations/20261105-church-events.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/migrations/20261105-community-news-details.sql
 ```
 
 `BETTER_AUTH_SECRET`도 이 셸에 설정해야 합니다. 운영 비밀값은 Git에 넣지 않습니다. `auth.config.ts`는 CLI가 인증 테이블을 만드는 데 사용합니다.

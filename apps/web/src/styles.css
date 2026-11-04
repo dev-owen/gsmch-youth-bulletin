@@ -61,3 +61,13 @@ input:focus,textarea:focus{border-color:#527b9d!important;box-shadow:0 0 0 3px r
 .upload-box{border-color:#d1dee8;color:#778c9e}.upload-box strong{color:#425b70}.upload-box p{color:#8e9eab}.add-button{border-color:#cbd9e4;background:#f7fafc;color:#4d687e}.add-button:hover:not(:disabled){background:#edf4f8}
 .promo-editor{border-color:#e1e9ef}.guide-card{background:#edf3f7;border-color:#dce6ee}.guide-card ul{color:#586f82}.guide-card p{color:#718596}.preview-device{background:#f5f8fb}
 @media(max-width:760px){.cover-content{padding:26px 23px}.site-header-inner{height:68px}}
+.community-person-editor{padding:12px;background:#f5f8fa;border:1px solid #e1e9f0;border-radius:4px;margin-top:12px}
+.community-person-editor .field{margin-bottom:0}
+.community-people{list-style:none;margin:0;padding:0;display:grid;gap:9px;color:#4d6274;font-size:0.9375rem;line-height:1.7}
+.community-peer{color:#738697;font-size:0.875rem}
+.community-wedding{margin:0;display:grid;gap:10px;font-size:0.875rem;line-height:1.7}
+.community-wedding>div{display:grid;grid-template-columns:2rem minmax(0,1fr);gap:10px}
+.community-wedding dt{color:#527b99;font-weight:700}
+.community-wedding dd{margin:0;color:#4d6274;white-space:pre-line;overflow-wrap:anywhere}
+.community-legacy{white-space:pre-line}
+@media(max-width:500px){.community-person-editor .field+.field{margin-top:12px}}

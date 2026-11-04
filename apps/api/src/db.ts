@@ -28,7 +28,7 @@ export async function getBulletin(db: Queryable, condition: string, value: strin
   const b = result.rows[0];
   const [items, community, promotions] = await Promise.all([
     db.query<{ label: string; content: string; assignee: string }>('SELECT label, content, assignee FROM worship_items WHERE bulletin_id = $1 ORDER BY position', [b.id]),
-    db.query<{ category: string; content: string }>('SELECT category, content FROM community_news WHERE bulletin_id = $1 ORDER BY position', [b.id]),
+    db.query<{ category: string; content: string; details: Pick<BulletinInput['communityNews'][number], 'people' | 'wedding'> }>('SELECT category, content, details FROM community_news WHERE bulletin_id = $1 ORDER BY position', [b.id]),
     db.query<{ title: string; body: string; details: { title: string; body: string }[]; url: string | null }>('SELECT title, body, details, url FROM promotions WHERE bulletin_id = $1 ORDER BY position', [b.id]),
   ]);
   return {
@@ -36,7 +36,7 @@ export async function getBulletin(db: Queryable, condition: string, value: strin
     cover: b.cover_object_key ? { objectKey: b.cover_object_key, altText: b.cover_alt_text } : null,
     sermonTitle: b.sermon_title, scripture: b.scripture, preacher: b.preacher,
     status: b.status, publishedAt: b.published_at,
-    worshipItems: items.rows, communityNews: community.rows,
+    worshipItems: items.rows, communityNews: community.rows.map(({ details, ...news }) => ({ ...news, ...details })),
     promotions: promotions.rows.map((p) => ({ ...p, url: p.url ?? '' })),
   };
 }
@@ -64,7 +64,7 @@ export async function replaceBulletin(client: PoolClient, id: string, data: Bull
     await client.query('INSERT INTO worship_items (bulletin_id, position, label, content, assignee) VALUES ($1, $2, $3, $4, $5)', [id, position, item.label, item.content, item.assignee]);
   }
   for (const [position, item] of data.communityNews.entries()) {
-    await client.query('INSERT INTO community_news (bulletin_id, position, category, content) VALUES ($1, $2, $3, $4)', [id, position, item.category, item.content]);
+    await client.query('INSERT INTO community_news (bulletin_id, position, category, content, details) VALUES ($1, $2, $3, $4, $5::jsonb)', [id, position, item.category, item.content, JSON.stringify({ people: item.people, wedding: item.wedding })]);
   }
   for (const [position, item] of data.promotions.entries()) {
     await client.query('INSERT INTO promotions (bulletin_id, position, title, body, details, url) VALUES ($1, $2, $3, $4, $5::jsonb, $6)', [id, position, item.title, item.body, JSON.stringify(item.details), item.url || null]);

@@ -11,7 +11,12 @@ export type SiteInfo = {
 };
 export type ChurchEvent = { title: string; date: string; content: string; contact: string };
 export type WorshipItem = { label: string; content: string; assignee: string };
-export type CommunityNews = { category: '새가족' | '등반' | '결혼' | '군입대'; content: string };
+export type CommunityPerson = { name: string; peer: string };
+export type CommunityWedding = { groom: CommunityPerson; bride: CommunityPerson; dateTime: string; location: string };
+export type CommunityNews = {
+  category: '새가족' | '등반' | '결혼' | '군입대'; content: string;
+  people?: CommunityPerson[]; wedding?: CommunityWedding;
+};
 export type Promotion = { title: string; body: string; details: { title: string; body: string }[]; url: string };
 export type Bulletin = {
   id: string; serviceDate: string; theme: string; coverMediaId: string | null;

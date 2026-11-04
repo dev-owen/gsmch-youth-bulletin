@@ -11,6 +11,35 @@ export const urlSchema = z.string().trim().max(2000).refine((value) => {
   try { return ['https:', 'http:'].includes(new URL(value).protocol); } catch { return false; }
 }, 'http 또는 https 주소를 입력해 주세요.');
 
+const communityPerson = z.object({ name: required(80), peer: required(40) });
+export const communityNewsInput = z.object({
+  category: z.enum(['새가족', '등반', '결혼', '군입대']),
+  content: bounded(20000).default(''),
+  people: z.array(communityPerson).min(1).max(100).optional(),
+  wedding: z.object({
+    groom: communityPerson, bride: communityPerson,
+    dateTime: required(120), location: required(200),
+  }).optional(),
+}).superRefine((news, context) => {
+  if (news.people !== undefined && news.category !== '새가족' && news.category !== '등반') {
+    context.addIssue({ code: 'custom', path: ['people'], message: '명단은 새가족·등반 소식에만 입력할 수 있습니다.' });
+  }
+  if (news.wedding !== undefined && news.category !== '결혼') {
+    context.addIssue({ code: 'custom', path: ['wedding'], message: '예식 정보는 결혼 소식에만 입력할 수 있습니다.' });
+  }
+  if (news.people === undefined && news.wedding === undefined && (!news.content || news.content.length > 300)) {
+    context.addIssue({ code: 'custom', path: ['content'], message: '소식 내용을 1~300자로 입력해 주세요.' });
+  }
+}).transform((news) => {
+  const person = ({ name, peer }: z.infer<typeof communityPerson>) => `${name} (${peer})`;
+  if (news.people) return { ...news, content: news.people.map(person).join('\n') };
+  if (news.wedding) {
+    const { groom, bride, dateTime, location } = news.wedding;
+    return { ...news, content: `신랑 ${person(groom)} · 신부 ${person(bride)}\n일시: ${dateTime}\n장소: ${location}` };
+  }
+  return news;
+});
+
 export const bulletinInput = z.object({
   serviceDate: dateSchema,
   theme: bounded(160),
@@ -20,7 +49,7 @@ export const bulletinInput = z.object({
   scripture: bounded(200),
   preacher: bounded(100),
   worshipItems: z.array(z.object({ label: required(120), content: bounded(300).default(''), assignee: bounded(100) })).max(30),
-  communityNews: z.array(z.object({ category: z.enum(['새가족', '등반', '결혼', '군입대']), content: required(300) })).max(30).default([]),
+  communityNews: z.array(communityNewsInput).max(30).default([]),
   promotions: z.array(z.object({ title: required(120), body: required(1000), details: z.array(z.object({ title: required(120), body: required(1000) })).max(20).default([]), url: urlSchema })).max(10),
 });
 
