@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, CalendarDays, ChevronRight, MapPin, Megaphone, Sparkles, WifiOff } from 'lucide-react';
 import { api, coverUrl, formatDate, readLatest, saveLatest, shortDate, type Bulletin, type CalendarEvent, type PublicData } from './lib';
 import { ChurchGuide } from './church-guide';
+import { BulletinQr } from './bulletin-qr';
 import { collectCalendarEvents, eventOccursOnDate, eventsForMonth, formatSchedule } from './calendar';
 import './promotion-schedule.css';
 import { CommunityNewsContent } from './community-news-content';
@@ -24,7 +25,7 @@ function Cover({ bulletin, offline }: { bulletin: Bulletin; offline?: boolean })
   return <section className={`cover ${image ? 'cover-image' : 'cover-text'}`}>
     {image && <img className="cover-photo" src={image} alt={bulletin.cover?.altText || ''} />}
     <div className="cover-content">
-      <div className="cover-top"><span className="eyebrow"><Sparkles size={13} /> SUNDAY WORSHIP</span>{offline && <span className="offline-badge"><WifiOff size={13} /> 오프라인 저장본</span>}</div>
+      <div className="cover-top"><span className="eyebrow"><Sparkles size={13} /> SUNDAY WORSHIP</span><div className="cover-actions">{offline && <span className="offline-badge"><WifiOff size={13} /> 오프라인 저장본</span>}{bulletin.status === 'published' && <BulletinQr key={bulletin.serviceDate} serviceDate={bulletin.serviceDate} />}</div></div>
       <div className="cover-main"><span className="cover-date">{formatDate(bulletin.serviceDate)}</span><span className="cover-line" /><h1>{bulletin.theme || '주일 예배'}</h1><p>함께 예배하는 기쁨, 오늘 이 자리에서</p></div>
       <div className="cover-bottom"><span>{CHURCH}</span><span>WEEKLY BULLETIN · {bulletin.serviceDate}</span></div>
     </div>

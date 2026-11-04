@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, CalendarDays, Check, ChevronRight, Eye, ImagePlus, LogOut, Plus, Save, Settings2, Trash2, UploadCloud, X } from 'lucide-react';
-import { api, authClient, coverUrl, json, shortDate, type Bulletin, type BulletinInput, type BulletinListItem, type CalendarEvent, type ChurchEvent, type SiteInfo } from './lib';
+import { api, authClient, coverUrl, json, shortDate, showToast, type Bulletin, type BulletinInput, type BulletinListItem, type CalendarEvent, type ChurchEvent, type SiteInfo } from './lib';
 import { BulletinContent } from './public';
 import { normalizeSiteInfo } from './church-info';
 import { RecurringInfoEditor } from './church-info-editor';
@@ -54,8 +54,8 @@ function BulletinIndex() {
   async function create() {
     if (!date) { setError('예배 날짜를 선택해 주세요.'); return; }
     setBusy(true); setError('');
-    try { const result = await api<{ id: string }>('/v1/admin/bulletins', json({ serviceDate: date }, 'POST')); navigate(`/admin/bulletins/${result.id}`); }
-    catch (e) { setError(e instanceof Error ? e.message : '주보를 만들지 못했습니다.'); }
+    try { const result = await api<{ id: string }>('/v1/admin/bulletins', json({ serviceDate: date }, 'POST')); showToast('새 주보를 만들었습니다.'); navigate(`/admin/bulletins/${result.id}`); }
+    catch (e) { const message = e instanceof Error ? e.message : '주보를 만들지 못했습니다.'; setError(message); showToast(message, 'error'); }
     finally { setBusy(false); }
   }
   return <div className="admin-page"><div className="admin-page-heading"><div><span className="eyebrow dark">WEEKLY BULLETINS</span><h1>주보 목록</h1><p>새 주보를 작성하고 발행 상태를 확인하세요.</p></div><button className="primary-button" onClick={() => setCreating(true)}><Plus size={18} /> 새 주보 만들기</button></div>
@@ -77,27 +77,43 @@ function BulletinEditor({ id }: { id: string }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const formRef = useRef<BulletinInput | null>(null);
   useEffect(() => {
     Promise.all([api<{ bulletin: Bulletin; calendarEvents?: CalendarEvent[] }>(`/v1/admin/bulletins/${id}`), api<{ siteInfo: SiteInfo }>('/v1/admin/site-info')]).then(([b, s]) => {
-      setBulletin(b.bulletin); setSiteInfo(s.siteInfo); setCalendarEvents(b.calendarEvents || []); setForm(toInput(b.bulletin));
+      const input = toInput(b.bulletin);
+      setBulletin(b.bulletin); setSiteInfo(s.siteInfo); setCalendarEvents(b.calendarEvents || []); formRef.current = input; setForm(input);
     }).catch((e) => setError(e.message));
   }, [id]);
-  function update(change: Partial<BulletinInput>) { setForm((value) => value ? { ...value, ...change } : null); setDirty(true); setNotice(''); }
+  function update(change: Partial<BulletinInput>) { setForm((value) => { if (!value) return null; const next = { ...value, ...change }; formRef.current = next; return next; }); setDirty(true); setNotice(''); }
   function itemChange(index: number, key: 'label' | 'content' | 'assignee', value: string) {
     if (!form) return; const copy = [...form.worshipItems]; copy[index] = { ...copy[index], [key]: value }; update({ worshipItems: copy });
   }
-  async function save() {
-    if (!form) return false;
+  async function save(automatic = false) {
+    const snapshot = formRef.current;
+    if (!snapshot) return false;
     setBusy(true); setError(''); setNotice('');
-    try { const result = await api<{ bulletin: Bulletin }>(`/v1/admin/bulletins/${id}`, json(form)); setBulletin(result.bulletin); setForm(toInput(result.bulletin)); setDirty(false); setNotice('초안을 저장했습니다.'); return true; }
-    catch (e) { setError(e instanceof Error ? e.message : '저장하지 못했습니다.'); return false; }
+    try {
+      const result = await api<{ bulletin: Bulletin }>(`/v1/admin/bulletins/${id}`, json(snapshot));
+      setBulletin(result.bulletin);
+      if (JSON.stringify(formRef.current) === JSON.stringify(snapshot)) {
+        const saved = toInput(result.bulletin); formRef.current = saved; setForm(saved); setDirty(false);
+      }
+      const message = automatic ? '변경 내용을 자동 저장했습니다.' : '주보를 저장했습니다.';
+      setNotice(message); showToast(message); return true;
+    }
+    catch (e) { const message = e instanceof Error ? e.message : '저장하지 못했습니다.'; setError(message); showToast(message, 'error'); return false; }
     finally { setBusy(false); }
   }
+  useEffect(() => {
+    if (!dirty || busy || uploading || !form) return;
+    const timer = window.setTimeout(() => { void save(true); }, 1800);
+    return () => window.clearTimeout(timer);
+  }, [dirty, busy, uploading, form]);
   async function publish() {
     if (dirty) { setError('변경 내용을 먼저 저장해 주세요.'); return; }
     setBusy(true); setError(''); setNotice('');
-    try { const result = await api<{ bulletin: Bulletin }>(`/v1/admin/bulletins/${id}/publish`, { method: 'POST' }); setBulletin(result.bulletin); setNotice('주보를 발행했습니다. 공개 주소에서 확인할 수 있습니다.'); }
-    catch (e) { setError(e instanceof Error ? e.message : '발행하지 못했습니다.'); }
+    try { const result = await api<{ bulletin: Bulletin }>(`/v1/admin/bulletins/${id}/publish`, { method: 'POST' }); setBulletin(result.bulletin); setNotice('주보를 발행했습니다. 공개 주소에서 확인할 수 있습니다.'); showToast('주보를 발행했습니다.'); }
+    catch (e) { const message = e instanceof Error ? e.message : '발행하지 못했습니다.'; setError(message); showToast(message, 'error'); }
     finally { setBusy(false); }
   }
   async function upload(file: File) {
@@ -108,14 +124,15 @@ function BulletinEditor({ id }: { id: string }) {
       const body = new FormData(); body.append('file', optimized); body.append('altText', form.coverAltText.trim());
       const result = await api<{ id: string; url: string }>('/v1/admin/media', { method: 'POST', body });
       update({ coverMediaId: result.id }); setBulletin((b) => b ? { ...b, cover: { objectKey: result.url.split('/').at(-1)!, altText: form.coverAltText.trim() } } : b);
-      setNotice(`이미지를 최적화해 업로드했습니다. ${Math.ceil(file.size / 1024).toLocaleString()}KB → ${Math.ceil(optimized.size / 1024).toLocaleString()}KB · 변경 내용을 저장해 주세요.`);
-    } catch (e) { setError(e instanceof Error ? e.message : '이미지를 올리지 못했습니다.'); }
+      const message = `이미지를 업로드했습니다. ${Math.ceil(file.size / 1024).toLocaleString()}KB → ${Math.ceil(optimized.size / 1024).toLocaleString()}KB · 변경 내용을 저장해 주세요.`;
+      setNotice(message); showToast('대표 이미지를 업로드했습니다. 저장하면 주보에 반영됩니다.');
+    } catch (e) { const message = e instanceof Error ? e.message : '이미지를 올리지 못했습니다.'; setError(message); showToast(message, 'error'); }
     finally { setUploading(false); }
   }
   if (!form || !bulletin || !siteInfo) return <div className="admin-page"><Link to="/admin" className="back-link"><ArrowLeft size={16} /> 주보 목록</Link><div className="admin-empty">{error || '주보를 불러오는 중입니다.'}</div></div>;
   const previewBulletin: Bulletin = { ...bulletin, ...form, cover: form.coverMediaId && bulletin.cover ? { ...bulletin.cover, altText: form.coverAltText } : null };
   return <div className="admin-page"><div className="editor-heading"><Link to="/admin" className="back-link"><ArrowLeft size={16} /> 주보 목록</Link><div className="admin-page-heading"><div><span className="eyebrow dark">BULLETIN EDITOR</span><h1>{bulletin.status === 'published' ? '주보 수정' : '주보 작성'}</h1><p>내용을 저장한 뒤 모바일 미리보기에서 확인하고 발행하세요.</p></div><span className={`status-chip ${bulletin.status}`}>{bulletin.status === 'published' ? '발행됨' : '초안'}</span></div></div>
-    <div className="editor-actions"><button className="secondary-button" onClick={() => setPreview(true)}><Eye size={17} /> 모바일 미리보기</button><button className="secondary-button" disabled={busy || uploading} onClick={save}><Save size={17} /> {busy ? '처리 중…' : '저장'}</button>{bulletin.status === 'draft' && <button className="primary-button" disabled={busy || dirty || uploading} onClick={publish}><Check size={17} /> 발행</button>}</div>
+    <div className="editor-actions"><button className="secondary-button" onClick={() => setPreview(true)}><Eye size={17} /> 모바일 미리보기</button><button className="secondary-button" disabled={busy || uploading} onClick={() => void save()}><Save size={17} /> {busy ? '처리 중…' : '저장'}</button>{bulletin.status === 'draft' && <button className="primary-button" disabled={busy || dirty || uploading} onClick={publish}><Check size={17} /> 발행</button>}</div>
     <ErrorNote text={error} />{notice && <div className="form-notice" role="status">{notice}</div>}
     <div className="editor-grid"><div className="editor-column"><section className="editor-card"><div className="editor-card-head"><span className="editor-card-number">01</span><div><h2>표지</h2><p>이번 주 예배의 첫 화면입니다.</p></div></div><div className="field-grid"><label className="field">예배 날짜<input type="date" value={form.serviceDate} disabled={bulletin.status === 'published'} onChange={(e) => update({ serviceDate: e.target.value })} /></label><label className="field">이번 주 주제<input value={form.theme} maxLength={160} onChange={(e) => update({ theme: e.target.value })} placeholder="예: 함께 걷는 믿음" /></label></div>
       <div className="upload-box"><ImagePlus size={22} /><div><strong>대표 이미지</strong><p>선택 사항 · JPG, PNG, WebP · 원본 20MB 이하 · 긴 변 최대 1,920px, 512KB 이하로 자동 압축</p></div></div>
@@ -153,9 +170,9 @@ function SiteInfoEditor() {
       const cleanGroups = (groups: typeof normalized.recurringInfo.missionGroups) => groups.map((group) => ({ ...group, entries: group.entries.map((entry) => entry.trim()).filter(Boolean) }));
       const input = { ...normalized, recurringInfo: { ...normalized.recurringInfo, missionGroups: cleanGroups(normalized.recurringInfo.missionGroups), staffGroups: cleanGroups(normalized.recurringInfo.staffGroups) }, churchEvents: (normalized.churchEvents || []).filter((event) => event.title.trim() && event.date).map((event) => ({ ...event, title: event.title.trim(), content: event.content.trim(), contact: event.contact.trim() })).sort((a, b) => a.date.localeCompare(b.date)) };
       const result = await api<{ siteInfo: SiteInfo }>('/v1/admin/site-info', json(input));
-      setForm(normalizeSiteInfo(result.siteInfo)); setNotice('교회 안내를 저장했습니다. 모든 주보에 반영됩니다.');
+      setForm(normalizeSiteInfo(result.siteInfo)); setNotice('교회 안내를 저장했습니다. 모든 주보에 반영됩니다.'); showToast('교회 안내를 저장했습니다.');
     }
-    catch (e) { setError(e instanceof Error ? e.message : '저장하지 못했습니다.'); }
+    catch (e) { const message = e instanceof Error ? e.message : '저장하지 못했습니다.'; setError(message); showToast(message, 'error'); }
     finally { setBusy(false); }
   }
   if (!form) return <div className="admin-page"><div className="admin-empty">{error || '교회 안내를 불러오는 중입니다.'}</div></div>;

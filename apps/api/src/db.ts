@@ -76,13 +76,22 @@ export async function replaceBulletin(client: PoolClient, id: string, data: Bull
   await client.query('DELETE FROM worship_items WHERE bulletin_id = $1', [id]);
   await client.query('DELETE FROM promotions WHERE bulletin_id = $1', [id]);
   await client.query('DELETE FROM community_news WHERE bulletin_id = $1', [id]);
-  for (const [position, item] of data.worshipItems.entries()) {
-    await client.query('INSERT INTO worship_items (bulletin_id, position, label, content, assignee) VALUES ($1, $2, $3, $4, $5)', [id, position, item.label, item.content, item.assignee]);
-  }
-  for (const [position, item] of data.communityNews.entries()) {
-    await client.query('INSERT INTO community_news (bulletin_id, position, category, content, details) VALUES ($1, $2, $3, $4, $5::jsonb)', [id, position, item.category, item.content, JSON.stringify({ people: item.people, wedding: item.wedding })]);
-  }
-  for (const [position, item] of data.promotions.entries()) {
-    await client.query('INSERT INTO promotions (bulletin_id, position, title, body, details, url) VALUES ($1, $2, $3, $4, $5::jsonb, $6)', [id, position, item.title, item.body, JSON.stringify(item.details), item.url || null]);
-  }
+  if (data.worshipItems.length) await client.query(
+    `INSERT INTO worship_items (bulletin_id, position, label, content, assignee)
+     SELECT $1, ordinality - 1, label, content, assignee
+     FROM jsonb_to_recordset($2::jsonb) WITH ORDINALITY AS x(label text, content text, assignee text, ordinality bigint)`,
+    [id, JSON.stringify(data.worshipItems)]
+  );
+  if (data.communityNews.length) await client.query(
+    `INSERT INTO community_news (bulletin_id, position, category, content, details)
+     SELECT $1, ordinality - 1, category, content, details
+     FROM jsonb_to_recordset($2::jsonb) WITH ORDINALITY AS x(category text, content text, details jsonb, ordinality bigint)`,
+    [id, JSON.stringify(data.communityNews.map(({ category, content, people, wedding }) => ({ category, content, details: { people, wedding } })))]
+  );
+  if (data.promotions.length) await client.query(
+    `INSERT INTO promotions (bulletin_id, position, title, body, details, url)
+     SELECT $1, ordinality - 1, title, body, details, NULLIF(url, '')
+     FROM jsonb_to_recordset($2::jsonb) WITH ORDINALITY AS x(title text, body text, details jsonb, url text, ordinality bigint)`,
+    [id, JSON.stringify(data.promotions)]
+  );
 }

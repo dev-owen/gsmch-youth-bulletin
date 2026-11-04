@@ -32,6 +32,10 @@ export type BulletinInput = Pick<Bulletin, 'serviceDate' | 'theme' | 'coverMedia
 export type BulletinListItem = Pick<Bulletin, 'id' | 'serviceDate' | 'theme' | 'status'>;
 export type PublicData = { bulletin: Bulletin | null; siteInfo: SiteInfo; calendarEvents?: CalendarEvent[] };
 
+export function showToast(message: string, kind: 'success' | 'error' = 'success') {
+  window.dispatchEvent(new CustomEvent('app-toast', { detail: { message, kind } }));
+}
+
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message); }
 }

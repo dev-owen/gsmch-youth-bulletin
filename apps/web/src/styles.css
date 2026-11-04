@@ -101,3 +101,4 @@ html{font-size:100%}
 .community-wedding dd{margin:0;color:#4d6274;white-space:pre-line;overflow-wrap:anywhere}
 .community-legacy{white-space:pre-line}
 @media(max-width:500px){.community-person-editor .field+.field{margin-top:12px}}
+.toast-viewport{position:fixed;z-index:1000;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(92vw,460px);pointer-events:none;display:grid;justify-items:center}.app-toast{pointer-events:auto;width:100%;padding:14px 18px;border-radius:8px;background:#213b4b;color:#fff;box-shadow:0 8px 28px rgba(20,36,43,.24);font-size:.875rem;line-height:1.5;text-align:center;animation:toast-in .18s ease-out}.app-toast.error{background:#9b3e35}.app-toast.success{background:#276447}@keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
