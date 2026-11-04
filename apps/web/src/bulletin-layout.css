@@ -21,6 +21,9 @@ body:has(.public-shell){min-width:0}
 .bulletin-body .worship-label{font-size:1rem;line-height:1.6}
 .bulletin-body .worship-assignee{font-size:.875rem;line-height:1.6;word-break:keep-all}
 .bulletin-body .worship-content{margin-top:3px;font-size:.8125rem;line-height:1.7}
+.worship-sermon-content{display:grid;gap:2px}
+.worship-sermon-title{color:var(--reading-text,#304b61);font-size:.9375rem;font-weight:700;line-height:1.6}
+.worship-sermon-scripture{color:var(--reading-muted,#5e7385);font-size:.8125rem;font-weight:400;line-height:1.6}
 .bulletin-body .sermon-card{padding:26px 28px}
 .bulletin-body .sermon-scripture{margin-bottom:14px;line-height:1.7}
 .bulletin-body .sermon-card h3{font-size:1.625rem;line-height:1.5;margin-bottom:20px;word-break:keep-all}

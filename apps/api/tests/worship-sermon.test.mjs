@@ -83,10 +83,14 @@ const { WorshipItemContent } = await loadWebModule('worship-item-content.tsx');
 const { WorshipEditor } = await loadWebModule('worship-editor.tsx');
 const { normalizeWorshipItems, syncSermonFields } = await loadWebModule('worship.ts');
 
-test('public sermon rows always show both fixed labels and safely render their values', () => {
+test('public sermon rows distinguish the values without showing field labels', () => {
   const render = (item) => renderToStaticMarkup(React.createElement(WorshipItemContent, { item }));
-  for (const value of ['설교 주제:', sermon.content.sermonTitle, '말씀 구절:', sermon.content.scripture]) assert.ok(render(sermon).includes(value));
-  assert.ok(render({ ...sermon, content: { sermonTitle: '', scripture: '' } }).includes('말씀 구절:'));
+  const markup = render(sermon);
+  assert.ok(markup.includes(`<strong class="worship-sermon-title">${sermon.content.sermonTitle}</strong>`));
+  assert.ok(markup.includes(`<span class="worship-sermon-scripture">${sermon.content.scripture}</span>`));
+  for (const item of [sermon, { ...sermon, content: { sermonTitle: '', scripture: '' } }]) {
+    assert.doesNotMatch(render(item), /설교 주제|말씀 구절/);
+  }
   assert.match(render({ ...sermon, content: { sermonTitle: '<script>', scripture: '본문' } }), /&lt;script&gt;/);
   assert.ok(render(text).includes(text.content));
   assert.equal(render({ ...text, content: '' }), '');
