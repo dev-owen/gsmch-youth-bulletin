@@ -1,75 +1,75 @@
 .church-guide{container-type:inline-size;overflow-wrap:anywhere}
 .guide-nav{display:flex;flex-wrap:wrap;gap:7px;padding:0 0 24px;border-bottom:1px solid #ded7cb}
-.guide-nav a{padding:9px 13px;background:#eee8dd;border-radius:20px;font-size:13px;font-weight:700;color:#615440;transition:background .2s}
+.guide-nav a{padding:9px 13px;background:#eee8dd;border-radius:20px;font-size:0.8125rem;font-weight:700;color:#615440;transition:background .2s}
 .guide-nav a:hover{background:#e2d7c4}
 .guide-nav a:focus-visible,.church-guide summary:focus-visible,.copy-account:focus-visible{outline:3px solid #af8a51;outline-offset:4px}
 .guide-section{padding-top:36px;scroll-margin-top:90px}
 .guide-section-heading{display:flex;align-items:center;gap:10px;margin-bottom:17px}
 .guide-section-heading>svg{flex-shrink:0;color:#a18558}
-.guide-section-heading h3{margin:0;font-size:21px;line-height:1.5;letter-spacing:-.04em;text-wrap:balance}
-.guide-label{display:block;font-size:11px;line-height:1.6;font-weight:700;letter-spacing:.06em;color:#88714e}
+.guide-section-heading h3{margin:0;font-size:1.3125rem;line-height:1.5;letter-spacing:-.04em;text-wrap:balance}
+.guide-label{display:block;font-size:0.6875rem;line-height:1.6;font-weight:700;letter-spacing:.06em;color:#88714e}
 .newcomer-card{display:flex;gap:19px;padding:27px 29px;background:#e9ede7;border:1px solid #d9e0d6;border-radius:5px;margin-bottom:14px}
 .newcomer-symbol{flex:0 0 44px;height:44px;display:grid;place-items:center;background:#f8faf6;border-radius:50%;color:#58715e}
 .newcomer-card .guide-label{color:#5d735d}
-.newcomer-card h4{font-size:20px;margin:6px 0 12px;letter-spacing:-.04em}
-.newcomer-card p{font-size:15px;line-height:1.8;color:#4d5d51;margin:0 0 8px;white-space:pre-line}
-.newcomer-card .newcomer-location{display:flex;align-items:flex-start;gap:8px;font-size:14px;margin:0}
+.newcomer-card h4{font-size:1.25rem;margin:6px 0 12px;letter-spacing:-.04em}
+.newcomer-card p{font-size:0.9375rem;line-height:1.8;color:#4d5d51;margin:0 0 8px;white-space:pre-line}
+.newcomer-card .newcomer-location{display:flex;align-items:flex-start;gap:8px;font-size:0.875rem;margin:0}
 .newcomer-location svg{margin-top:5px;flex-shrink:0}
 .meeting-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .meeting-card{min-width:0;padding:25px 21px;background:#fffdfa;border:1px solid #e5ded3;border-radius:5px}
-.meeting-card .guide-label{font-size:9px;letter-spacing:.08em}
-.meeting-card h4{font-size:18px;letter-spacing:-.055em;margin:12px 0 19px;line-height:1.5}
-.meeting-schedule,.meeting-location{display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:1.7;margin:0 0 10px;white-space:pre-line}
+.meeting-card .guide-label{font-size:0.5625rem;letter-spacing:.08em}
+.meeting-card h4{font-size:1.125rem;letter-spacing:-.055em;margin:12px 0 19px;line-height:1.5}
+.meeting-schedule,.meeting-location{display:flex;align-items:flex-start;gap:8px;font-size:0.875rem;line-height:1.7;margin:0 0 10px;white-space:pre-line}
 .meeting-schedule{font-weight:700;color:#344c56}
 .meeting-location{color:#69716a}
 .meeting-schedule svg,.meeting-location svg{margin-top:4px;flex-shrink:0;color:#a68b60}
 .guide-detail{margin-top:17px;border-top:1px solid #e5ded2;padding-top:13px}
-.guide-detail summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;font-size:13px;font-weight:700;line-height:1.6;color:#6e604c;min-height:28px}
+.guide-detail summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;font-size:0.8125rem;font-weight:700;line-height:1.6;color:#6e604c;min-height:28px}
 .church-guide summary::-webkit-details-marker{display:none}
 .church-guide summary svg{flex-shrink:0;transition:transform .2s}
 .church-guide details[open]>summary svg{transform:rotate(180deg)}
-.guide-detail p{font-size:14px;color:#626b65;line-height:1.85;white-space:pre-line;margin:12px 0 0}
-.guide-detail .meeting-contact{font-size:13px;color:#53665a}
+.guide-detail p{font-size:0.875rem;color:#626b65;line-height:1.85;white-space:pre-line;margin:12px 0 0}
+.guide-detail .meeting-contact{font-size:0.8125rem;color:#53665a}
 .offering-card{border:1px solid #ded4c3;border-radius:5px;padding:29px;background:#fffdfa}
 .offering-account{display:flex;align-items:center;justify-content:space-between;gap:18px}
-.account-number{display:block;color:#2c424c;font-size:29px;letter-spacing:-.035em;font-variant-numeric:tabular-nums;margin:8px 0;user-select:all;line-height:1.35}
-.offering-account p{font-size:13px;color:#747469;margin:0}
-.copy-account{display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #d4c5aa;border-radius:4px;background:#f4eee4;padding:11px 14px;font-size:13px;font-weight:700;color:#6b593d;white-space:nowrap;min-height:44px}
-.copy-feedback{font-size:12px;color:#526851;margin:9px 0 0}
+.account-number{display:block;color:#2c424c;font-size:1.8125rem;letter-spacing:-.035em;font-variant-numeric:tabular-nums;margin:8px 0;user-select:all;line-height:1.35}
+.offering-account p{font-size:0.8125rem;color:#747469;margin:0}
+.copy-account{display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #d4c5aa;border-radius:4px;background:#f4eee4;padding:11px 14px;font-size:0.8125rem;font-weight:700;color:#6b593d;white-space:nowrap;min-height:44px}
+.copy-feedback{font-size:0.75rem;color:#526851;margin:9px 0 0}
 .copy-feedback:empty{display:none}
-.offering-instructions{display:grid;grid-template-columns:1fr 1.6fr;gap:29px;margin-top:24px;padding-top:24px;border-top:1px solid #e6ded2}
-.offering-instructions h4{font-size:15px;margin:0 0 10px}
-.offering-instructions p{font-size:14px;color:#68706a;line-height:1.85;white-space:pre-line;margin:0}
-.transfer-example{display:inline-block;font-size:12px;font-weight:700;color:#80623c;background:#f3eadc;padding:7px 10px;margin-top:12px;border-radius:3px}
+.offering-instructions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:29px;margin-top:24px;padding-top:24px;border-top:1px solid #e6ded2}
+.offering-instructions h4{font-size:0.9375rem;margin:0 0 10px}
+.offering-instructions p{font-size:0.875rem;color:#68706a;line-height:1.85;white-space:pre-line;margin:0}
+.transfer-example{display:inline-block;font-size:0.75rem;font-weight:700;color:#80623c;background:#f3eadc;padding:7px 10px;margin-top:12px;border-radius:3px}
 .vision-card{background:#233c48;color:#f8f6ef;border-radius:5px;padding:32px}
-.vision-introduction{font-size:14px;line-height:1.9;color:#d1dadd;white-space:pre-line;margin-bottom:25px}
-.vision-statement{font-size:24px;line-height:1.6;font-weight:700;letter-spacing:-.04em;white-space:pre-line;margin:0 0 12px;text-wrap:balance}
-.vision-reference{font-size:12px;color:#dbc69e}
+.vision-introduction{font-size:0.875rem;line-height:1.9;color:#d1dadd;white-space:pre-line;margin-bottom:25px}
+.vision-statement{font-size:1.5rem;line-height:1.6;font-weight:700;letter-spacing:-.04em;white-space:pre-line;margin:0 0 12px;text-wrap:balance}
+.vision-reference{font-size:0.75rem;color:#dbc69e}
 .vision-points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:29px;padding-top:25px;border-top:1px solid #53616a}
-.vision-points h4{font-size:15px;color:#e2cba2;margin:0 0 9px}
-.vision-points p{font-size:14px;line-height:1.85;color:#e0e6e4;margin:0 0 12px}
-.vision-points small{font-size:11px;color:#b9c7c9}
-.guide-description{font-size:14px;color:#73766b;line-height:1.8;margin:-4px 0 17px}
+.vision-points h4{font-size:0.9375rem;color:#e2cba2;margin:0 0 9px}
+.vision-points p{font-size:0.875rem;line-height:1.85;color:#e0e6e4;margin:0 0 12px}
+.vision-points small{font-size:0.6875rem;color:#b9c7c9}
+.guide-description{font-size:0.875rem;color:#73766b;line-height:1.8;margin:-4px 0 17px}
 .directory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
 .directory-card{min-width:0;border:1px solid #e2dace;background:#fffdfa;border-radius:4px}
-.directory-card>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;padding:20px;list-style:none;min-height:66px;font-size:15px;font-weight:700}
-.directory-meta{display:flex;align-items:center;gap:10px;flex-shrink:0;font-size:11px;font-weight:400;color:#8a7e6a}
+.directory-card>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;padding:20px;list-style:none;min-height:66px;font-size:0.9375rem;font-weight:700}
+.directory-meta{display:flex;align-items:center;gap:10px;flex-shrink:0;font-size:0.6875rem;font-weight:400;color:#8a7e6a}
 .mission-list{list-style:none;padding:0 20px 13px;margin:0}
-.mission-list li{font-size:14px;line-height:1.8;color:#5c6965;padding:9px 0;border-top:1px solid #eee8dd;white-space:pre-line}
-.directory-note{font-size:12px;line-height:1.8;color:#878476;margin:13px 0 0}
+.mission-list li{font-size:0.875rem;line-height:1.8;color:#5c6965;padding:9px 0;border-top:1px solid #eee8dd;white-space:pre-line}
+.directory-note{font-size:0.75rem;line-height:1.8;color:#878476;margin:13px 0 0}
 .staff-list{margin:0;padding:0 20px 11px}
 .staff-list>div{padding:12px 0;border-top:1px solid #eee8dd}
-.staff-list dt{font-size:12px;font-weight:700;line-height:1.7;color:#957748;margin-bottom:5px}
-.staff-list dd{font-size:14px;line-height:1.8;color:#53625c;margin:0;white-space:pre-line}
+.staff-list dt{font-size:0.75rem;font-weight:700;line-height:1.7;color:#957748;margin-bottom:5px}
+.staff-list dd{font-size:0.875rem;line-height:1.8;color:#53625c;margin:0;white-space:pre-line}
 .church-visit{border-top:1px solid #ded6c9;padding-top:25px;margin-top:32px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:25px}
-.church-visit h4{font-size:14px;margin:0 0 9px}
-.church-visit p{font-size:14px;color:#72796f;white-space:pre-line;line-height:1.8;margin:0 0 10px}
+.church-visit h4{font-size:0.875rem;margin:0 0 9px}
+.church-visit p{font-size:0.875rem;color:#72796f;white-space:pre-line;line-height:1.8;margin:0 0 10px}
 .recurring-fieldset{min-width:0;padding:20px 16px 0;border:1px solid #e0e4dc;margin:24px 0}
-.recurring-fieldset legend{font-size:14px;font-weight:700;padding:0 9px;color:#617260}
-.editor-field-help{font-size:12px;line-height:1.8;color:#7a8578;margin:8px 0 20px}
+.recurring-fieldset legend{font-size:0.875rem;font-weight:700;padding:0 9px;color:#617260}
+.editor-field-help{font-size:0.75rem;line-height:1.8;color:#7a8578;margin:8px 0 20px}
 .site-info-save{margin-top:22px}
-@container(max-width:650px){.meeting-grid,.vision-points,.offering-instructions{grid-template-columns:1fr}.meeting-card{padding:23px}.meeting-card h4{margin:8px 0 14px}.vision-points{gap:20px}.vision-points>div+div{border-top:1px solid #53616a;padding-top:19px}.offering-instructions{gap:23px}.newcomer-card{padding:24px 20px;gap:13px}.offering-card,.vision-card{padding:25px}.vision-statement{font-size:22px}.guide-section-heading h3{font-size:20px}}
-@container(max-width:440px){.directory-grid,.church-visit{grid-template-columns:1fr}.offering-account{align-items:flex-start;flex-direction:column;gap:15px}.account-number{font-size:25px}.copy-account{width:100%}.newcomer-card{display:block}.newcomer-symbol{width:42px;margin-bottom:14px}.guide-nav a{font-size:12px;padding:9px 11px}.guide-section-heading{align-items:flex-start}.guide-section-heading>svg{margin-top:5px}}
+@container(max-width:40.625rem){.meeting-grid,.vision-points,.offering-instructions{grid-template-columns:1fr}.meeting-card{padding:23px}.meeting-card h4{margin:8px 0 14px}.vision-points{gap:20px}.vision-points>div+div{border-top:1px solid #53616a;padding-top:19px}.offering-instructions{gap:23px}.newcomer-card{padding:24px 20px;gap:13px}.offering-card,.vision-card{padding:25px}.vision-statement{font-size:1.375rem}.guide-section-heading h3{font-size:1.25rem}}
+@container(max-width:27.5rem){.directory-grid,.church-visit{grid-template-columns:1fr}.offering-account{align-items:flex-start;flex-direction:column;gap:15px}.account-number{font-size:1.5625rem}.copy-account{width:100%}.newcomer-card{display:block}.newcomer-symbol{width:42px;margin-bottom:14px}.guide-nav a{font-size:0.75rem;padding:9px 11px}.guide-section-heading{align-items:flex-start}.guide-section-heading>svg{margin-top:5px}}
 
 /* Blue-gray finish shared with the bulletin and admin views */
 .guide-nav{border-color:#dce6ee}.guide-nav a{background:#edf3f7;color:#526b80}.guide-nav a:hover{background:#e1ebf2}

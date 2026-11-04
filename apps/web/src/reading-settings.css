@@ -1,0 +1,30 @@
+.header-actions{display:flex;align-items:center;gap:12px;margin-inline-start:auto}
+/* Keep the controls at the system text size while the bulletin itself grows. */
+.reading-settings{position:relative;z-index:20;font-size:var(--native-reading-font-size,1rem)}
+.reading-native-size{position:fixed;top:0;left:0;visibility:hidden;pointer-events:none;font-size:medium;line-height:1;inline-size:1em;block-size:1em;contain:strict}
+@supports(font:-apple-system-body){.reading-native-size{font:-apple-system-body}}
+.reading-settings-trigger{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:44px;min-height:44px;padding:10px 12px;border:1px solid #d6e2eb;border-radius:8px;background:#fff;color:#526a7e;font-size:.8125em;font-weight:700}
+.reading-settings-trigger:hover,.reading-settings-trigger[aria-expanded=true]{background:#eaf2f7;border-color:#a6bed0;color:#315f84}
+.reading-settings svg{flex-shrink:0}
+.reading-settings button:focus-visible{outline:2px solid #527b9d;outline-offset:3px}
+.reading-settings-panel{position:absolute;top:calc(100% + 12px);right:0;width:min(20em,calc(100vw - 32px));max-height:70dvh;overflow:auto;overscroll-behavior:contain;padding:18px;border:1px solid #dce6ee;border-radius:12px;background:#fff;color:#263746;box-shadow:0 12px 40px rgba(27,51,72,.16);overflow-wrap:anywhere}
+.reading-settings-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.reading-settings-heading h2{min-width:0;margin:0;font-size:1em;line-height:1.5;letter-spacing:-.04em}
+.reading-settings-close{display:grid;place-items:center;flex-shrink:0;width:44px;height:44px;margin:-6px -6px -6px 0;border:0;border-radius:50%;background:#f0f5f8;color:#536e84}
+.reading-settings-close:hover{background:#e3edf4}
+.reading-settings-label{margin:0 0 12px;color:#627383;font-size:.875em;font-weight:700}
+.reading-size-controls{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:12px}
+.reading-size-controls button{display:grid;place-items:center;min-width:44px;min-height:44px;padding:8px;border:1px solid #cddde9;border-radius:8px;background:#f0f5f8;color:#315f80}
+.reading-size-controls button:hover:not(:disabled){background:#e3edf4}
+.reading-size-controls output{min-width:0;text-align:center;font-size:1.25em;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.5}
+.reading-size-reset{width:100%;min-height:44px;margin-top:14px;padding:10px;border:1px solid #dce6ee;border-radius:8px;background:#fff;color:#526a7e;font-size:.8125em;font-weight:700}
+.reading-size-reset:hover:not(:disabled){background:#f0f5f8}
+.reading-settings-help{margin:14px 0 0;color:#7a8d9e;font-size:.75em;line-height:1.7}
+@media(max-width:500px){.header-actions{gap:9px}.reading-settings-trigger{padding:10px}.reading-settings-trigger>span{display:none}}
+
+/* Stack the assignee when OS text size and the reader's setting leave little room. */
+@container(max-width:18rem){
+  .public-shell .bulletin-body .worship-row{grid-template-columns:1.5rem minmax(0,1fr)}
+  .public-shell .bulletin-body .worship-index{grid-row:1 / span 2;align-self:start}
+  .public-shell .bulletin-body .worship-assignee{grid-column:2;text-align:left}
+}

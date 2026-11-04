@@ -6,13 +6,14 @@ import { ChurchGuide } from './church-guide';
 import { collectCalendarEvents, eventOccursOnDate, eventsForMonth, formatSchedule } from './calendar';
 import './promotion-schedule.css';
 import { CommunityNewsContent } from './community-news-content';
+import { ReadingSettings } from './reading-settings';
 
 const CHURCH = '선한목자 젊은이교회';
 
 function Brand({ home = false }: { home?: boolean }) {
   return <header className="site-header"><div className="site-header-inner">
     <Link to="/" className="brand" aria-label="선한목자 젊은이교회 주보 홈"><span className="brand-symbol">✦</span><span><strong>선한목자 젊은이교회</strong><small>YOUTH CHURCH BULLETIN</small></span></Link>
-    <Link className="header-link" to={home ? '/archive' : '/'}>{home ? '지난 주보' : '이번 주 주보'} <ArrowUpRight size={15} /></Link>
+    <div className="header-actions"><Link className="header-link" to={home ? '/archive' : '/'}>{home ? '지난 주보' : '이번 주 주보'} <ArrowUpRight size={15} /></Link><ReadingSettings /></div>
   </div></header>;
 }
 
