@@ -19,8 +19,24 @@ export const bulletinInput = z.object({
   sermonTitle: bounded(200),
   scripture: bounded(200),
   preacher: bounded(100),
-  worshipItems: z.array(z.object({ label: required(120), assignee: bounded(100) })).max(30),
-  promotions: z.array(z.object({ title: required(120), body: required(500), url: urlSchema })).max(3),
+  worshipItems: z.array(z.object({ label: required(120), content: bounded(300).default(''), assignee: bounded(100) })).max(30),
+  communityNews: z.array(z.object({ category: z.enum(['새가족', '등반', '결혼', '군입대']), content: required(300) })).max(30).default([]),
+  promotions: z.array(z.object({ title: required(120), body: required(1000), details: z.array(z.object({ title: required(120), body: required(1000) })).max(20).default([]), url: urlSchema })).max(10),
+});
+
+const directoryGroups = z.array(z.object({ title: required(120), entries: z.array(required(500)).max(100) })).max(20);
+export const recurringInfoInput = z.object({
+  offering: z.object({
+    bank: required(100), accountNumber: required(100), accountHolder: required(100),
+    envelope: bounded(2000), transfer: bounded(2000), example: bounded(200), mainChurch: bounded(2000),
+  }),
+  meetings: z.array(z.object({ title: required(120), schedule: bounded(500), location: bounded(500), description: bounded(2000), contact: bounded(300) })).max(10),
+  newcomer: z.object({ welcome: bounded(1000), guidance: bounded(2000) }),
+  visionReference: bounded(200),
+  visionPoints: z.array(z.object({ title: required(120), body: bounded(1000), reference: bounded(200) })).max(10),
+  missionGroups: directoryGroups,
+  missionNote: bounded(500),
+  staffGroups: directoryGroups,
 });
 
 export const siteInfoInput = z.object({
@@ -31,6 +47,7 @@ export const siteInfoInput = z.object({
   vision: bounded(2000),
   address: bounded(500),
   mapUrl: urlSchema,
+  recurringInfo: recurringInfoInput.optional(),
 });
 
 export type BulletinInput = z.infer<typeof bulletinInput>;

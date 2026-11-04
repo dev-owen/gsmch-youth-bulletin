@@ -36,6 +36,10 @@ npm run deploy:free -- --secrets-file ../../deployment/secrets.free.local.json
 
 배포 후 `/`, `/v1/health`, `/v1/bulletins/current`를 확인하고 `npm run check:api -- https://gsmch-youth-bulletin.gsmch-youth-dev.workers.dev 100 5`로 초기 응답 시간을 기록합니다.
 
+### 기존 DB에 2026-11-05 변경 반영
+
+새 API를 배포하기 전에 `apps/api/db/migrations/20261105-bulletin-structure.sql`과 `apps/api/db/migrations/20261105-recurring-info.sql`을 순서대로 운영 PostgreSQL에 적용합니다. 예배 내용·광고 세부 항목·교우 소식·공통 교회 안내 저장 필드를 추가하며 기존 주보는 보존합니다. 새 DB는 `apps/api/db/schema.sql`로 한 번에 준비할 수 있습니다. GitHub Actions는 DB 마이그레이션을 자동 실행하지 않습니다.
+
 Google OAuth 앱과 첫 관리자 승인이 끝난 뒤 로그인 복귀, 발행 직후 갱신, 날짜별 직접 접속, 모바일 오프라인 재접속을 실제 기기에서 확인합니다. 교회 소개·모임 시간·주소는 공식 자료를 확인한 다음 관리자 화면에 입력합니다.
 
 ## GitHub Actions CI/CD

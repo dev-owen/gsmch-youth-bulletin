@@ -156,9 +156,11 @@ app.get('/v1/admin/site-info', async (c) => c.json({ siteInfo: await getSiteInfo
 app.put('/v1/admin/site-info', async (c) => {
   const input = siteInfoInput.parse(await c.req.json());
   await c.get('pool').query(`UPDATE site_info SET church_name = $1, worship_time = $2, gathering_time = $3,
-    introduction = $4, vision = $5, address = $6, map_url = $7, updated_at = now() WHERE id = 1`,
-    [input.churchName, input.worshipTime, input.gatheringTime, input.introduction, input.vision, input.address, input.mapUrl]);
-  return c.json({ siteInfo: input }, 200, noStore);
+    introduction = $4, vision = $5, address = $6, map_url = $7,
+    recurring_info = COALESCE($8::jsonb, recurring_info), updated_at = now() WHERE id = 1`,
+    [input.churchName, input.worshipTime, input.gatheringTime, input.introduction, input.vision, input.address, input.mapUrl,
+      input.recurringInfo ? JSON.stringify(input.recurringInfo) : null]);
+  return c.json({ siteInfo: await getSiteInfo(c.get('pool')) }, 200, noStore);
 });
 
 app.post('/v1/admin/media', async (c) => {

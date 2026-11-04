@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS worship_items (
   bulletin_id uuid NOT NULL REFERENCES bulletins(id) ON DELETE CASCADE,
   position integer NOT NULL CHECK (position >= 0),
   label text NOT NULL,
+  content text NOT NULL DEFAULT '',
   assignee text NOT NULL DEFAULT '',
   UNIQUE (bulletin_id, position)
 );
@@ -36,12 +37,27 @@ CREATE TABLE IF NOT EXISTS worship_items (
 CREATE TABLE IF NOT EXISTS promotions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   bulletin_id uuid NOT NULL REFERENCES bulletins(id) ON DELETE CASCADE,
-  position integer NOT NULL CHECK (position BETWEEN 0 AND 2),
+  position integer NOT NULL CHECK (position BETWEEN 0 AND 9),
   title text NOT NULL,
   body text NOT NULL,
   url text,
+  details jsonb NOT NULL DEFAULT '[]'::jsonb,
   UNIQUE (bulletin_id, position)
 );
+
+CREATE TABLE IF NOT EXISTS community_news (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  bulletin_id uuid NOT NULL REFERENCES bulletins(id) ON DELETE CASCADE,
+  position integer NOT NULL CHECK (position >= 0),
+  category text NOT NULL CHECK (category IN ('새가족', '등반', '결혼', '군입대')),
+  content text NOT NULL,
+  UNIQUE (bulletin_id, position)
+);
+
+ALTER TABLE worship_items ADD COLUMN IF NOT EXISTS content text NOT NULL DEFAULT '';
+ALTER TABLE promotions ADD COLUMN IF NOT EXISTS details jsonb NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE promotions DROP CONSTRAINT IF EXISTS promotions_position_check;
+ALTER TABLE promotions ADD CONSTRAINT promotions_position_check CHECK (position BETWEEN 0 AND 9);
 
 CREATE TABLE IF NOT EXISTS site_info (
   id integer PRIMARY KEY DEFAULT 1 CHECK (id = 1),
@@ -52,8 +68,11 @@ CREATE TABLE IF NOT EXISTS site_info (
   vision text NOT NULL DEFAULT '',
   address text NOT NULL DEFAULT '',
   map_url text NOT NULL DEFAULT '',
+  recurring_info jsonb NOT NULL DEFAULT '{}'::jsonb,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE site_info ADD COLUMN IF NOT EXISTS recurring_info jsonb NOT NULL DEFAULT '{}'::jsonb;
 
 CREATE TABLE IF NOT EXISTS site_settings (
   id integer PRIMARY KEY DEFAULT 1 CHECK (id = 1),

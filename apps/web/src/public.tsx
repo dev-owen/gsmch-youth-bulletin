@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, CalendarDays, ChevronRight, Clock3, MapPin, Megaphone, Sparkles, WifiOff } from 'lucide-react';
-import { api, coverUrl, formatDate, readLatest, saveLatest, shortDate, type Bulletin, type PublicData, type SiteInfo } from './lib';
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, CalendarDays, ChevronRight, MapPin, Megaphone, Sparkles, WifiOff } from 'lucide-react';
+import { api, coverUrl, formatDate, readLatest, saveLatest, shortDate, type Bulletin, type PublicData } from './lib';
+import { ChurchGuide } from './church-guide';
 
 const CHURCH = '선한목자 젊은이교회';
 
@@ -30,34 +31,45 @@ function SectionHeading({ number, kicker, title, icon }: { number: string; kicke
   return <div className="section-heading"><div><span className="section-kicker">{number} / {kicker}</span><h2>{title}</h2></div>{icon && <span className="section-icon">{icon}</span>}</div>;
 }
 
-function SiteInfoCards({ info }: { info: SiteInfo }) {
-  const cards = [
-    { icon: <Clock3 size={20} />, label: '예배 및 모임', body: [info.worshipTime, info.gatheringTime].filter(Boolean).join('\n') },
-    { icon: <BookOpen size={20} />, label: '교회 소개', body: info.introduction },
-    { icon: <Sparkles size={20} />, label: '우리의 비전', body: info.vision },
-    { icon: <MapPin size={20} />, label: '오시는 길', body: info.address, url: info.mapUrl },
-  ];
-  return <div className="info-grid">{cards.map((card) => <div className="info-card" key={card.label}>
-    <div className="info-icon">{card.icon}</div><div><h3>{card.label}</h3><p>{card.body || '안내를 준비하고 있습니다.'}</p>{card.url && <a href={card.url} target="_blank" rel="noreferrer" className="text-link">지도에서 보기 <ArrowUpRight size={15} /></a>}</div>
-  </div>)}</div>;
+function ReadingTools({ hasNews, hasAnnouncements }: { hasNews: boolean; hasAnnouncements: boolean }) {
+  const links = [['worship', '예배 순서'], ['message', '오늘의 말씀'], ...(hasNews ? [['news', '교우 소식']] : []), ...(hasAnnouncements ? [['announcements', '광고']] : []), ['about', '교회 안내']];
+  return <>
+    <div className="reading-progress" aria-hidden="true"><span /></div>
+    <nav className="reading-nav" aria-label="주보 바로가기">{links.map(([id, label]) => <a key={id} href={`#${id}`}>{label}</a>)}</nav>
+  </>;
 }
 
 export function BulletinContent({ data, offline = false, preview = false }: { data: PublicData; offline?: boolean; preview?: boolean }) {
   const { bulletin, siteInfo } = data;
+  useEffect(() => {
+    const elements = document.querySelectorAll('.content-section, .archive-cta');
+    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
+      if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }
+    }), { threshold: 0, rootMargin: '0px 0px -35px 0px' });
+    elements.forEach((element) => observer.observe(element));
+    const update = () => {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      document.documentElement.style.setProperty('--reading-progress', `${scrollable > 0 ? window.scrollY / scrollable * 100 : 0}%`);
+    };
+    update(); window.addEventListener('scroll', update, { passive: true }); window.addEventListener('resize', update);
+    return () => { observer.disconnect(); window.removeEventListener('scroll', update); window.removeEventListener('resize', update); };
+  }, [bulletin]);
   if (!bulletin) return <div className="empty-bulletin"><span className="empty-symbol">✦</span><span className="eyebrow dark">WELCOME TO OUR CHURCH</span><h1>{siteInfo.churchName || CHURCH}</h1><p>새 주보를 준비하고 있습니다.<br />곧 이곳에서 예배 소식을 만나보실 수 있습니다.</p></div>;
   return <>
     <Cover bulletin={bulletin} offline={offline} />
+    <ReadingTools hasNews={Boolean(bulletin.communityNews?.length)} hasAnnouncements={bulletin.promotions.length > 0} />
     <div className="bulletin-body">
-      <section className="content-section worship-section"><SectionHeading number="01" kicker="ORDER OF WORSHIP" title="예배 순서" icon={<CalendarDays size={23} />} />
-        <div className="worship-list">{bulletin.worshipItems.map((item, index) => <div className="worship-row" key={`${index}-${item.label}`}><span className="worship-index">{String(index + 1).padStart(2, '0')}</span><span className="worship-label">{item.label}</span><span className="worship-assignee">{item.assignee}</span></div>)}</div>
+      <section id="worship" className="content-section worship-section"><SectionHeading number="01" kicker="ORDER OF WORSHIP" title="예배 순서" icon={<CalendarDays size={23} />} />
+        <div className="worship-list">{bulletin.worshipItems.map((item, index) => <div className="worship-row" key={`${index}-${item.label}`}><span className="worship-index">{String(index + 1).padStart(2, '0')}</span><span className="worship-label">{item.label}{item.content && <small className="worship-content">{item.content}</small>}</span><span className="worship-assignee">{item.assignee}</span></div>)}</div>
       </section>
-      <section className="content-section"><SectionHeading number="02" kicker="THE MESSAGE" title="오늘의 말씀" icon={<BookOpen size={23} />} />
+      <section id="message" className="content-section"><SectionHeading number="02" kicker="THE MESSAGE" title="오늘의 말씀" icon={<BookOpen size={23} />} />
         <div className="sermon-card"><span className="sermon-mark">“</span><p className="sermon-scripture">{bulletin.scripture}</p><h3>{bulletin.sermonTitle}</h3><div className="sermon-preacher"><span className="small-rule" />{bulletin.preacher}</div></div>
       </section>
-      {bulletin.promotions.length > 0 && <section className="content-section"><SectionHeading number="03" kicker="COMMUNITY NEWS" title="함께하는 소식" icon={<Megaphone size={23} />} />
-        <div className="promotion-list">{bulletin.promotions.map((card, index) => <article className="promotion-card" key={`${index}-${card.title}`}><span className="promotion-number">0{index + 1}</span><div><h3>{card.title}</h3><p>{card.body}</p>{card.url && <a href={card.url} target="_blank" rel="noreferrer" className="text-link">자세히 보기 <ArrowUpRight size={16} /></a>}</div></article>)}</div>
+      {bulletin.communityNews?.length > 0 && <section id="news" className="content-section"><SectionHeading number="03" kicker="COMMUNITY NEWS" title="교우 소식" icon={<Sparkles size={23} />} /><div className="news-carousel" aria-label="교우 소식, 좌우로 밀어 보기">{bulletin.communityNews.map((news, index) => <article className="promotion-card" key={`${index}-${news.category}`}><span className="promotion-number">{news.category}</span><div><p>{news.content}</p></div></article>)}</div>{bulletin.communityNews.length > 1 && <p className="swipe-hint"><ArrowLeft size={14} /> 좌우로 밀어 소식을 살펴보세요 <ArrowRight size={14} /></p>}</section>}
+      {bulletin.promotions.length > 0 && <section id="announcements" className="content-section"><SectionHeading number="04" kicker="ANNOUNCEMENTS" title="광고" icon={<Megaphone size={23} />} />
+        <div className="promotion-list">{bulletin.promotions.map((card, index) => <details className="promotion-card announcement-card" key={`${index}-${card.title}`} open={index === 0}><summary><span className="promotion-number">{String(index + 1).padStart(2, '0')}</span><span><strong>{card.title}</strong><small>눌러서 자세히 보기</small></span><ChevronRight className="announcement-chevron" size={19} /></summary><div className="announcement-body">{card.body && <p>{card.body}</p>}{card.details?.map((detail, detailIndex) => <div className="promotion-detail" key={detailIndex}><strong>{detail.title}</strong><p>{detail.body}</p></div>)}{card.url && <a href={card.url} target="_blank" rel="noreferrer" className="text-link">자세히 보기 <ArrowUpRight size={16} /></a>}</div></details>)}</div>
       </section>}
-      <section className="content-section info-section"><SectionHeading number={bulletin.promotions.length ? '04' : '03'} kicker="ABOUT OUR CHURCH" title="교회 안내" icon={<MapPin size={23} />} /><SiteInfoCards info={siteInfo} /></section>
+      <section id="about" className="content-section info-section"><SectionHeading number="05" kicker="LIFE TOGETHER" title="매주 함께하는 안내" icon={<MapPin size={23} />} /><ChurchGuide siteInfo={siteInfo} /></section>
       {!preview && <Link to="/archive" className="archive-cta"><span><small>PREVIOUS BULLETINS</small><strong>지난 주보 보기</strong></span><span className="round-arrow"><ArrowRight size={20} /></span></Link>}
     </div>
   </>;

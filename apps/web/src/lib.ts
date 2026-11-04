@@ -1,4 +1,5 @@
 import { createAuthClient } from 'better-auth/react';
+import type { RecurringInfo } from './church-info';
 
 export const API_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 export const MEDIA_BASE = (import.meta.env.VITE_MEDIA_BASE_URL || `${API_BASE}/v1/media`).replace(/\/$/, '');
@@ -6,18 +7,19 @@ export const authClient = createAuthClient({ baseURL: API_BASE, fetchOptions: { 
 
 export type SiteInfo = {
   churchName: string; worshipTime: string; gatheringTime: string; introduction: string;
-  vision: string; address: string; mapUrl: string;
+  vision: string; address: string; mapUrl: string; recurringInfo?: Partial<RecurringInfo>;
 };
-export type WorshipItem = { label: string; assignee: string };
-export type Promotion = { title: string; body: string; url: string };
+export type WorshipItem = { label: string; content: string; assignee: string };
+export type CommunityNews = { category: '새가족' | '등반' | '결혼' | '군입대'; content: string };
+export type Promotion = { title: string; body: string; details: { title: string; body: string }[]; url: string };
 export type Bulletin = {
   id: string; serviceDate: string; theme: string; coverMediaId: string | null;
   cover: { objectKey: string; altText: string } | null;
   sermonTitle: string; scripture: string; preacher: string;
   status: 'draft' | 'published'; publishedAt: string | null;
-  worshipItems: WorshipItem[]; promotions: Promotion[];
+  worshipItems: WorshipItem[]; communityNews: CommunityNews[]; promotions: Promotion[];
 };
-export type BulletinInput = Pick<Bulletin, 'serviceDate' | 'theme' | 'coverMediaId' | 'sermonTitle' | 'scripture' | 'preacher' | 'worshipItems' | 'promotions'> & { coverAltText: string };
+export type BulletinInput = Pick<Bulletin, 'serviceDate' | 'theme' | 'coverMediaId' | 'sermonTitle' | 'scripture' | 'preacher' | 'worshipItems' | 'communityNews' | 'promotions'> & { coverAltText: string };
 export type BulletinListItem = Pick<Bulletin, 'id' | 'serviceDate' | 'theme' | 'status'>;
 export type PublicData = { bulletin: Bulletin | null; siteInfo: SiteInfo };
 
