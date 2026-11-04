@@ -5,6 +5,7 @@ import { ZodError } from 'zod';
 import { createAuth } from './auth';
 import { getBulletin, getPromotionCalendarEvents, getSiteInfo, replaceBulletin, toWorshipItem, transaction, type WorshipItemRow } from './db';
 import { readImage } from './media';
+import { publicResponseCache } from './public-cache';
 import type { AppEnv } from './types';
 import { bulletinInput, dateSchema, siteInfoInput, worshipItemsComplete } from './validation';
 
@@ -14,6 +15,11 @@ const fail = (code: string, message: string, status: 400 | 401 | 403 | 404 | 409
   Response.json({ code, message }, { status, headers: noStore });
 const publicationError = '날짜·주제·설교와 예배 순서 담당자를 모두 입력해 주세요.';
 
+app.use('/api/auth/*', (c, next) => cors({ origin: c.env.WEB_ORIGIN, credentials: true })(c, next));
+app.use('/v1/*', (c, next) => cors({ origin: c.env.WEB_ORIGIN, credentials: true })(c, next));
+// Cache hits return before opening a database pool. CORS is applied per request.
+app.use('/v1/*', publicResponseCache());
+
 app.use('*', async (c, next) => {
   const connectionString = c.env.HYPERDRIVE?.connectionString || c.env.DATABASE_URL;
   if (!connectionString) return fail('CONFIG_ERROR', '데이터베이스 연결이 설정되지 않았습니다.', 503);
@@ -22,8 +28,6 @@ app.use('*', async (c, next) => {
   try { await next(); } finally { await pool.end(); }
 });
 
-app.use('/api/auth/*', (c, next) => cors({ origin: c.env.WEB_ORIGIN, credentials: true })(c, next));
-app.use('/v1/*', (c, next) => cors({ origin: c.env.WEB_ORIGIN, credentials: true })(c, next));
 app.all('/api/auth/*', (c) => createAuth(c.env, c.get('pool')).handler(c.req.raw));
 
 app.get('/v1/health', async (c) => {

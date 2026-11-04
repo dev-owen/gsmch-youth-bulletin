@@ -1,7 +1,8 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, CalendarDays, ChevronRight, MapPin, Megaphone, Sparkles, WifiOff } from 'lucide-react';
-import { api, coverUrl, formatDate, readLatest, saveLatest, shortDate, type Bulletin, type CalendarEvent, type Promotion, type PublicData } from './lib';
+import { api, coverUrl, formatDate, saveLatest, shortDate, type Bulletin, type CalendarEvent, type Promotion, type PublicData } from './lib';
+import { usePublicApi } from './use-public-api';
 import { ChurchGuide } from './church-guide';
 import { BulletinQr } from './bulletin-qr';
 import { calendarEventColors, collectCalendarEvents, eventMarkerOnDate, eventsForMonth, formatSchedule } from './calendar';
@@ -146,28 +147,13 @@ function ChurchCalendar({ events, initialDate }: { events: CalendarEvent[]; init
 export function PublicPage({ invalidRoute = false }: { invalidRoute?: boolean }) {
   const { t } = useLanguage();
   const { date } = useParams();
-  const [data, setData] = useState<PublicData | null>(null);
-  const [offline, setOffline] = useState(false);
-  const [error, setError] = useState('');
+  const validRoute = !invalidRoute && (!date || /^\d{4}-\d{2}-\d{2}$/.test(date));
+  const { data, offline, error: loadError } = usePublicApi<PublicData>(validRoute ? (date ? `/v1/bulletins/${date}` : '/v1/bulletins/current') : null);
+  const error = !validRoute || (loadError && 'status' in loadError && loadError.status === 404) ? 'not-found'
+    : loadError ? (!date && (!('status' in loadError) || !navigator.onLine) ? 'no-cache' : 'load-failed') : '';
   useEffect(() => {
-    if (invalidRoute || (date && !/^\d{4}-\d{2}-\d{2}$/.test(date))) { setError('not-found'); return; }
-    let active = true;
-    setData(null); setOffline(false); setError('');
-    api<PublicData>(date ? `/v1/bulletins/${date}` : '/v1/bulletins/current').then((result) => {
-      if (!active) return;
-      setData(result);
-      if (!date) saveLatest(result);
-    }).catch((reason) => {
-      if (!active) return;
-      if (!date && (!(reason instanceof Error && 'status' in reason) || !navigator.onLine)) {
-        const cached = readLatest();
-        if (cached) { setData(cached); setOffline(true); return; }
-        setError('no-cache'); return;
-      }
-      setError(reason instanceof Error && 'status' in reason && reason.status === 404 ? 'not-found' : 'load-failed');
-    });
-    return () => { active = false; };
-  }, [date, invalidRoute]);
+    if (validRoute && !date && data && !loadError) saveLatest(data);
+  }, [date, validRoute, data, loadError]);
   return <div className="public-shell"><Brand home={!date} />
     <main className="public-main">{date && <Link to="/archive" className="back-link"><ArrowLeft size={16} /> {t('지난 주보 목록')}</Link>}
       {error ? <Status><WifiOff size={24} /><p>{t(error === 'not-found' ? '페이지를 찾을 수 없습니다.' : error === 'no-cache' ? '저장된 주보가 없습니다. 인터넷 연결 후 다시 열어 주세요.' : '주보를 불러오지 못했습니다.')}</p><Link to="/">{t('홈으로 가기')}</Link></Status> : data ? <BulletinContent data={data} offline={offline} /> : <Status><span className="loading-spinner" /><p>{t('주보를 불러오는 중입니다.')}</p></Status>}
@@ -178,26 +164,31 @@ function Footer() { const { t } = useLanguage(); return <footer className="site-
 
 export function ArchivePage() {
   const { t, locale } = useLanguage();
-  const [items, setItems] = useState<{ id: string; serviceDate: string; theme: string }[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  async function load(next?: string) {
-    setLoading(true); setError('');
+  type ArchiveData = { items: { id: string; serviceDate: string; theme: string }[]; nextCursor: string | null };
+  const { data, error, reload } = usePublicApi<ArchiveData>('/v1/bulletins');
+  const baseKey = data ? JSON.stringify(data) : '';
+  const [pagination, setPagination] = useState<{ base: string; pages: ArchiveData[]; loading: boolean; error: boolean }>({ base: '', pages: [], loading: false, error: false });
+  const pages = pagination.base === baseKey ? pagination.pages : [];
+  const items = [data, ...pages].flatMap((page) => page?.items || []);
+  const cursor = pages.length ? pages.at(-1)!.nextCursor : data?.nextCursor;
+  const loading = !data && !error;
+  const loadingMore = pagination.base === baseKey && pagination.loading;
+  const pageError = pagination.base === baseKey && pagination.error;
+  async function loadMore() {
+    if (!cursor || loadingMore) return;
+    const base = baseKey;
+    setPagination({ base, pages, loading: true, error: false });
     try {
-      const result = await api<{ items: typeof items; nextCursor: string | null }>(`/v1/bulletins${next ? `?cursor=${encodeURIComponent(next)}` : ''}`);
-      setItems((previous) => next ? [...previous, ...result.items] : result.items);
-      setCursor(result.nextCursor);
-    } catch { setError('load-failed'); }
-    finally { setLoading(false); }
+      const result = await api<ArchiveData>(`/v1/bulletins?cursor=${encodeURIComponent(cursor)}`);
+      setPagination((current) => current.base === base ? { base, pages: [...current.pages, result], loading: false, error: false } : current);
+    } catch { setPagination((current) => current.base === base ? { ...current, loading: false, error: true } : current); }
   }
-  useEffect(() => { void load(); }, []);
   return <div className="public-shell"><Brand /><main className="archive-main"><Link to="/" className="back-link"><ArrowLeft size={16} /> {t('이번 주 주보')}</Link>
     <div className="archive-heading"><span className="eyebrow dark">OUR JOURNEY</span><h1>{t('지난 주보')}</h1><p>{t('함께 드린 예배의 기록을 다시 만나보세요.')}</p></div>
-    {error && <Status><p>{t('목록을 불러오지 못했습니다.')}</p><button className="simple-button" onClick={() => load(cursor || undefined)}>{t('다시 시도')}</button></Status>}
+    {(error || pageError) && <Status><p>{t('목록을 불러오지 못했습니다.')}</p><button className="simple-button" onClick={error ? reload : loadMore}>{t('다시 시도')}</button></Status>}
     <div className="archive-list">{items.map((item) => <Link className="archive-item" key={item.id} to={`/bulletins/${item.serviceDate}`}><span className="archive-calendar"><CalendarDays size={22} /></span><span><small>{shortDate(item.serviceDate, locale)}</small><strong>{item.theme || t('주일 예배')}</strong></span><ChevronRight size={20} /></Link>)}</div>
     {!loading && !error && items.length === 0 && <Status><p>{t('아직 발행된 주보가 없습니다.')}</p></Status>}
-    {loading && <Status><span className="loading-spinner" /><p>{t('불러오는 중입니다.')}</p></Status>}
-    {!loading && cursor && <button className="load-more" onClick={() => load(cursor)}>{t('더 보기')} <ArrowRight size={16} /></button>}
+    {(loading || loadingMore) && <Status><span className="loading-spinner" /><p>{t('불러오는 중입니다.')}</p></Status>}
+    {!loadingMore && cursor && <button className="load-more" onClick={loadMore}>{t('더 보기')} <ArrowRight size={16} /></button>}
   </main><Footer /></div>;
 }
